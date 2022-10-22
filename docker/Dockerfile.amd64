@@ -18,7 +18,7 @@ FROM pulumi/pulumi-nodejs:3.43.1
 
 COPY src /src
 WORKDIR /src
-RUN npm install
+RUN npm install && pulumi plugin install
 
 ## Set up the CMD as well as the pre and post hooks.
 COPY go-init /bin/go-init

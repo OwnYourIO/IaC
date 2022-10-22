@@ -1,6 +1,6 @@
 {
     "name": "ownyou.io",
-    "main": "index.ts",
+    "main": "infra/index.ts",
     "devDependencies": {
         "@types/node": "^14"
     },
