@@ -1,0 +1,13 @@
+{
+    "name": "ownyou.io",
+    "main": "index.ts",
+    "devDependencies": {
+        "@types/node": "^14"
+    },
+    "dependencies": {
+        "@pulumi/cloudflare": "^4.12.1",
+        "@pulumi/hcloud": "^1.10.1",
+        "@pulumi/pulumi": "^3.0.0",
+        "@pulumi/command": "^0.5.2"
+    }
+}
