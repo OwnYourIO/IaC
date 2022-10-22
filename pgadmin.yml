@@ -1,0 +1,12 @@
+version: "3.5"
+networks:
+  example_service-pgadmin:
+
+services:
+  pgadmin:
+    networks:
+      - example_service-pgadmin
+
+  example_service:
+    networks:
+      - example_service-pgadmin

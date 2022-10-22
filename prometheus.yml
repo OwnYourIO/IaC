@@ -1,0 +1,12 @@
+version: "3.5"
+networks:
+  example_service-prometheus:
+
+services:
+  prometheus:
+    networks:
+      - example_service-prometheus
+
+  example_service:
+    networks:
+      - example_service-prometheus

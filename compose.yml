@@ -1,0 +1,110 @@
+version: "3.5"
+# Use replace_example_service.sh to replace all instances of example_service
+# with your_actual_service_name and EXAMPLE_SERVICE with YOUR_ACTUAL_SERVICE_NAME. 
+
+networks:
+  example_service:
+  example_service-private:
+
+volumes:
+  example_service:
+  example_service-db:
+
+secrets:
+  example_service_admin_password:
+    name: ${STACK_NAME:-technocore}_example_service_admin_password
+    external: true
+  example_service_example_service_db_password:
+    name: ${STACK_NAME:-technocore}_example_service_example_service_db_password
+    external: true
+  example_service_db_example_service_password:
+    name: ${STACK_NAME:-technocore}_example_service_db_example_service_password
+    external: true
+
+services:
+  ## Uncomment this if Traefik will be used for routing traffick to this service.
+  #ingress:
+  #  networks:
+  #    - example_service
+
+  example_service:
+    deploy:
+      labels:
+      #  - traefik.frontend.rule=$EXAMPLE_SERVICE_ROUTING_LABEL
+      #  - traefik.frontend.priority=$EXAMPLE_SERVICE_ROUTING_LABEL_PRIORITY
+      #  # You'll need to set application's port here.
+      #  - traefik.port=SET_ME_PLEASE
+      #  - ${TRAEFIK_BASIC_AUTH}
+      #  - traefik.enable=true
+      #  - traefik.tags=ingress 
+      #  - traefik.docker.network=${STACK_NAME:-technocore}_example_service
+      #  # Traefik service that listens to HTTP
+      #  - traefik.redirectorservice.frontend.entryPoints=http
+      #  - traefik.redirectorservice.frontend.redirect.entryPoint=https
+      #  # Traefik service that listens to HTTPS
+      #  - traefik.webservice.frontend.entryPoints=https
+        - com.ouroboros.enable=true
+        #- user-provided-secret-dns_token=example_service dns_token
+        #- user-provided-secret-dns_user=example_service dns_user
+      mode: global
+      restart_policy:
+        condition: any
+      placement:
+        constraints:
+          - node.role == manager
+      # Big services will need this modified or removed.
+      resources:
+        limits:
+          memory: 128M
+        reservations:
+          memory: 64M
+    environment:
+      # Sometimes you have to pass in ${DOMAIN} to enable the correct link paths to be generated.
+      #- MQTT_USER=${example_service}
+      - ADMIN_USER=${ADMIN_USER}
+      - ADMIN_PASSWORD={{"{{DOCKER-SECRET:admin_password}}"}}
+    image: ${image_provider:-scififarms}/technocore-example_service:${TAG:-latest}
+    logging:
+      driver: "${LOGGING_DRIVER}"
+      options:
+        tag: "{{.Name}}"
+    networks:
+      - example_service
+      - example_service-private
+    #secrets:
+    #  - source: example_service_admin_password
+    #    target: admin_password
+    #  - source: example_service_example_service_db_password
+    #    target: example_service_db_password
+    volumes:
+      # Likely need to change this
+      - example_service:/var/lib/example_service
+      # This should in fact be all upper case.
+      - ${DEV_MOUNT_EXAMPLE_SERVICE_MIGRATIONS:-$EMPTY_MOUNT}
+
+  example_service_db:
+    deploy:
+      labels:
+        - com.ouroboros.enable=true
+      mode: global
+      restart_policy:
+        condition: any
+    environment:
+      - POSTGRES_USER=example_service
+      - POSTGRES_PASSWORD={{"{{DOCKER-SECRET:example_service_password}}"}}
+      - POSTGRES_DB=example_service
+    image: ${image_provider:-scififarms}/technocore-example_service-db:${TAG:-latest}
+    logging:
+      driver: "${LOGGING_DRIVER}"
+      options:
+        tag: "{{.Name}}"
+    networks:
+      - example_service-private
+    secrets:
+      - source: example_service_db_admin_password
+        target: admin_password
+      - source: example_service_db_example_service_password
+        target: example_service_password
+    volumes:
+      # Likely need to change this
+      - example_service-db:/var/lib/postgresql/data
