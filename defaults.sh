@@ -32,7 +32,7 @@ set_service_flag $service_name
 #    export ESPHOME_VOLUME=esphome
 #fi
 
-#generate_mount dev migrations /usr/share/dogfish/shell-migrations
+generate_mount dev src /src
 
 #set_optional_service home-assistant
 #set_optional_service influxdb

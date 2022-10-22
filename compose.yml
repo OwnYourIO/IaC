@@ -72,7 +72,5 @@ services:
     #  - source: pulumi_pulumi_db_password
     #    target: pulumi_db_password
     volumes:
-      # Likely need to change this
-      - ${TECHNOCORE_DATA}:/var/lib/pulumi
-      # This should in fact be all upper case.
-      - ${DEV_MOUNT_PULUMI_MIGRATIONS:-$EMPTY_MOUNT}
+      - ${DEV_MOUNT_PULUMI_SRC:-$EMPTY_MOUNT}
+      - ${TECHNOCORE_DATA}/pulumi-infra/:/src/infra/
