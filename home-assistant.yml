@@ -5,4 +5,4 @@ services:
     environment:
       # This is only an example and should get updated to match the service at hand.
       # Where to find Matierial Design Icon names: https://materialdesignicons.com/
-      - SIDEBAR_EXAMPLE_SERVICE=        example_service|example_service.$DOMAIN|mdi:home-automation
+      - SIDEBAR_PULUMI=        pulumi|pulumi.$DOMAIN|mdi:home-automation

@@ -1,12 +1,12 @@
 version: "3.5"
 networks:
-  example_service-pgadmin:
+  pulumi-pgadmin:
 
 services:
   pgadmin:
     networks:
-      - example_service-pgadmin
+      - pulumi-pgadmin
 
-  example_service:
+  pulumi:
     networks:
-      - example_service-pgadmin
+      - pulumi-pgadmin

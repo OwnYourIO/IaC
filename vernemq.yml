@@ -1,21 +1,21 @@
 version: "3.5"
 secrets:
-  mqtt_example_service_password:
-    name: ${STACK_NAME:-technocore}_mqtt_example_service_password
+  mqtt_pulumi_password:
+    name: ${STACK_NAME:-technocore}_mqtt_pulumi_password
     external: true
-  example_service_mqtt_password:
-    name: ${STACK_NAME:-technocore}_example_service_mqtt_password
+  pulumi_mqtt_password:
+    name: ${STACK_NAME:-technocore}_pulumi_mqtt_password
     external: true
 
 services:
   mqtt:
     networks:
-      - example_service
+      - pulumi
     secrets:
-      - source: mqtt_example_service_password
-        target: users/example_service
+      - source: mqtt_pulumi_password
+        target: users/pulumi
 
-  example_service:
+  pulumi:
     secrets:
-      - source: example_service_mqtt_password
+      - source: pulumi_mqtt_password
         target: mqtt_password

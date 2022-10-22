@@ -10,4 +10,4 @@ source ${TECHNOCORE_LIB}/create-secret.sh
 # not get created because there is no admin service.
 #generate_password_for [your_service_name]
 #generate_password_for mqtt
-#generate_password_for example_service_db
+#generate_password_for pulumi_db
