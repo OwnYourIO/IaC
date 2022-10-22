@@ -44,8 +44,10 @@ env_secrets_expand() {
     fi
 }
 env_secrets_expand
-dogfish migrate &
+#dogfish migrate &
 
-# Add any additional script here. 
+# TODO: This should allow using the service and s3 buckets.
+pulumi login file:///src/infra/
 
-exec "$@"
+tail -f /dev/null
+#exec "$@"
