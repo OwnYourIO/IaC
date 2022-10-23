@@ -59,6 +59,7 @@ services:
       #- MQTT_USER=${pulumi}
       - ADMIN_USER=${ADMIN_USER}
       - ADMIN_PASSWORD={{"{{DOCKER-SECRET:admin_password}}"}}
+      - PULUMI_CONFIG_PASSPHRASE=123456test
     image: ${image_provider:-scififarms}/technocore-pulumi:${TAG:-latest}
     logging:
       driver: "${LOGGING_DRIVER}"
