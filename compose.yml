@@ -73,4 +73,4 @@ services:
     #    target: pulumi_db_password
     volumes:
       - ${DEV_MOUNT_PULUMI_SRC:-$EMPTY_MOUNT}
-      - ${TECHNOCORE_DATA}/pulumi-infra/:/src/infra/
+      #- ${TECHNOCORE_DATA}/pulumi-infra/:/src/infra/
