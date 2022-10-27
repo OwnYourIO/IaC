@@ -6,13 +6,16 @@
         "module": "ESNext",
         "moduleResolution": "node",
         "declaration": true,
-        "stripInternal": true,
         "sourceMap": true,
         "experimentalDecorators": true,
         "pretty": true,
         "noFallthroughCasesInSwitch": true,
         "noImplicitReturns": true,
         "forceConsistentCasingInFileNames": true
+    },
+    "ts-node": {
+        "esm": true,
+        "experimentalSpecifierResolution": "node"
     },
     "files": [
         "infra/index.ts"
