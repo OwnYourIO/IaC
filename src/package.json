@@ -1,6 +1,7 @@
 {
     "name": "ownyou.io",
     "main": "infra/index.ts",
+    "type": "module",
     "devDependencies": {
         "@types/node": "^16.18.0"
     },
