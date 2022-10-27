@@ -10,7 +10,7 @@ RUN apt-get update -y && \
     apt-get upgrade -y && \
     apt-get install -y curl build-essential git ca-certificates
 # Install the Pulumi SDK, including the CLI and language runtimes.
-RUN curl -fsSL https://get.pulumi.com/ | bash -s -- --version 3.43.1 && mv /root/.pulumi/bin/* /usr/local/bin/
+RUN curl -fsSL https://get.pulumi.com/ | bash -s -- --version 3.44.2 && mv /root/.pulumi/bin/* /usr/local/bin/
 
 
 #RUN apk add --no-cache bash
