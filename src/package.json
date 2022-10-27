@@ -11,7 +11,8 @@
         "@pulumi/pulumi": "^3.43.1",
         "@pulumi/command": "^0.5.2",
         "ts-node": "^10.4.0",
-        "typescript": "^4.5.4"
+        "typescript": "^4.5.4",
+        "bitwarden-cli-utils": "^1.0.1"
     },
     "resolutions": {
         "ts-node": "^10.4.0",
