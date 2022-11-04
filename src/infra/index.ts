@@ -24,16 +24,13 @@ const vpnServer = new VirtualMachine('VPN Server', {
     additionalSubdomains: ['dashboard.vpn', 'mx.vpn', 'api.vpn', 'broker.vpn'],
     cloud: 'hetzner',
     size: 'small',
-    dnsProvider: 'cloudflare'
+    dnsProvider: 'cloudflare',
+    installDocker: true,
+    installNetMaker: true,
+    tlsEmail: 'tms@spencerslab.com',
 }, {
 
 });
-
-const connection: types.input.remote.ConnectionArgs = {
-    host: server.ipv4Address,
-    user: "root",
-    privateKey: privateKey,
-};
 
 export const vpnIPv4 = vpnServer.ipv4;
 export const vpnFQDN = vpnServer.fqdn;
