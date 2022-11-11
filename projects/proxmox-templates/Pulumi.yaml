@@ -1,0 +1,3 @@
+name: proxmox-templates
+description: Templates in Proxmox to be reused in other projects
+runtime: nodejs
