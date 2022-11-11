@@ -1,7 +1,4 @@
 {
-    "name": "ownyou.io",
-    "main": "index.ts",
-    "type": "module",
     "devDependencies": {
         "@types/node": "^18.11.7"
     },

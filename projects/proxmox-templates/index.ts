@@ -11,7 +11,7 @@ import {
     log
 } from "@pulumi/pulumi";
 import { remote, types } from "@pulumi/command";
-import { VirtualMachine, DNSRecord } from './resources';
+import { VirtualMachine, DNSRecord } from '../../resources';
 
 const config = new Config();
 const domain = config.require('domain');

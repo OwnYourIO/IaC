@@ -1,0 +1,4 @@
+{
+    "name": "proxmox-templates",
+    "main": "index.ts"
+}

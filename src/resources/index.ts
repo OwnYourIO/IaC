@@ -64,7 +64,7 @@ export class VirtualMachine extends ComponentResource {
                 switch (image) {
                     case 'debian-11':
                         templateId = '999';
-                        templateImageURL = 'https://cdimage.debian.org/images/cloud/bullseye/latest/debian-11-nocloud-amd64.qcow2';
+                        templateImageURL = 'https://cdimage.debian.org/images/cloud/bullseye/latest/debian-11-genericcloud-amd64.qcow2';
                         if (args.proxmoxTemplate) {
                             args.vmId = Number(templateId);
                         }
@@ -82,7 +82,6 @@ export class VirtualMachine extends ComponentResource {
                 const proxmoxServer = new proxmox.vm.VirtualMachine(`${this.fqdn}`, {
                     nodeName: 'proxmox',
                     agent: {
-                        enabled: true, // toggles checking for ip addresses through qemu-guest-agent
                         trim: true,
                         type: 'virtio',
                     },
@@ -91,12 +90,6 @@ export class VirtualMachine extends ComponentResource {
                         cores: 2,
                         sockets: 1,
                     },
-                    disks: [{
-                        interface: 'scsi0',
-                        datastoreId: 'local-lvm',
-                        size: 32,
-                        fileFormat: 'qcow2',
-                    }],
                     initialization: {
                         type: 'nocloud',
                         dns: {
@@ -121,7 +114,6 @@ export class VirtualMachine extends ComponentResource {
                     ],
                     onBoot: true,
                     operatingSystem: { type: 'l26' },
-                    started: true,
                     timeoutShutdownVm: 45,
                     timeoutReboot: 45,
                     vmId: args.vmId,
@@ -141,13 +133,12 @@ export class VirtualMachine extends ComponentResource {
                         create: `
                                             wget -O ${image}.qcow2 ${templateImageURL} 
                                             qm importdisk ${templateId} ${image}.qcow2 local-lvm
+                                            qm set ${templateId} --scsi0 local-lvm:vm-${templateId}-disk-1
                                             `
                     }, { dependsOn: [proxmoxServer] });
                     commandsDependsOn.push(debTemplatePost);
                 }
 
-                this.ipv4 = proxmoxServer.ipv4Addresses[0][0];
-                this.ipv6 = proxmoxServer.ipv6Addresses[0][0];
                 break;
             case 'hetzner':
                 const serverType = config.get(`hetzner-vm-${args.size}`) ?? 'cpx11';
