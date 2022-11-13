@@ -1,7 +1,8 @@
 import {
-    Input,
     Config,
-    log
+    getStack,
+    log,
+    Input,
 } from "@pulumi/pulumi";
 import { remote, types } from "@pulumi/command";
 import { VirtualMachine } from '../../resources';
@@ -27,10 +28,11 @@ const vpnServer = new VirtualMachine('VPN Server', {
 // Netmaker ingress
 const vpnIngressHostname = config.get('vpn-ingress-hostname') ?? 'vpn-ingress';
 const vpnIngress = new VirtualMachine('VPN Ingress', {
-    hostname: vpnIngressHostname,
+    hostname: `${vpnIngressHostname}-${getStack()}`,
     domain,
     cloud: 'proxmox',
-    size: 'small',
+    size: 'Small',
+    image: 'debian11',
     //dnsProvider: 'cloudflare',
     installDocker: true,
     installNetMaker: false,

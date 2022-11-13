@@ -2,7 +2,9 @@ import { ComponentResource, Output } from '@pulumi/pulumi';
 
 import {
     Config,
-    log, concat, Input
+    log, concat, interpolate, Input,
+    output,
+    StackReference, getStack,
 } from "@pulumi/pulumi";
 import * as hcloud from "@pulumi/hcloud";
 import * as cloudflare from "@pulumi/cloudflare";
@@ -21,7 +23,7 @@ export class VirtualMachine extends ComponentResource {
         args: {
             dnsProvider?: 'cloudflare' | 'hetzner';
             cloud: 'proxmox' | 'hetzner';
-            size: 'small' | 'medium' | 'large';
+            size: 'Small' | 'Medium' | 'Large';
             additionalSubdomains?: string[];
             hostname: string;
             domain?: string;
@@ -40,13 +42,13 @@ export class VirtualMachine extends ComponentResource {
         super('pkg:index:VirtualMachine', name, {}, opts);
         this.fqdn = `${args.hostname}.${args.domain}`;
 
-        const image = args.image ?? config.get('default-image') ?? 'debian-11';
+        const image = args.image ?? config.get('default-image') ?? 'debian11';
 
         const adminUser = args.adminUser ?? config.get(`default-admin-user`) ?? 'admin';
         const publicKey = config.get(`${name}-publicKey`) ?? readFileSync(join(homedir(), ".ssh", "id_rsa.pub")).toString("utf8");
         const privateKey = config.getSecret(`${name}-privateKey`) ?? readFileSync(join(homedir(), ".ssh", "id_rsa")).toString("utf8");
 
-        const commandsDependsOn = [];
+        const commandsDependsOn: any[] = [];
 
         switch (args.cloud) {
             case 'proxmox':
@@ -59,53 +61,76 @@ export class VirtualMachine extends ComponentResource {
                     config.require('proxmox_ve_password')
                 );
 
-                let templateId: string;
+                let templateId: Output<any>;
                 let templateImageURL: string;
                 switch (image) {
-                    case 'debian-11':
-                        templateId = '999';
-                        templateImageURL = 'https://cdimage.debian.org/images/cloud/bullseye/latest/debian-11-genericcloud-amd64.qcow2';
-                        if (args.proxmoxTemplate) {
-                            args.vmId = Number(templateId);
+                    case 'debian11':
+                        const env = getStack();
+                        const templates = new StackReference(`TheHackmeister/proxmox-templates/${env}`);
+                        if (!args.proxmoxTemplate) {
+                            templateId = templates.getOutput(`${image}${args.size}TemplateId`);
+                        } else {
+                            templateId = concat('');
                         }
+                        templateImageURL = 'https://cdimage.debian.org/images/cloud/bullseye/latest/debian-11-genericcloud-amd64.qcow2';
                         break;
                     default:
                         new Error(`image: ${image} not supported`);
                         // This makes the linter happy. It should never get called.
-                        templateId = '';
+                        templateId = concat('');
                         templateImageURL = '';
                         break;
                 }
 
-                let preConditions = [provider];
+                let templateVMSettings = {};
+                switch (args.size) {
+                    case 'Small':
+                        if (args.proxmoxTemplate) {
+                            templateVMSettings = {
+                                cpu: {
+                                    cores: 2,
+                                    sockets: 1,
+                                },
+                                memory: {
+                                    dedicated: 2000,
+                                },
+                            }
+                        } else {
+                            templateVMSettings = {
+                                clone: {
+                                    vmId: templateId,
+                                    datastoreId: 'local-lvm',
+                                    full: true,
+                                },
+                                initialization: {
+                                    type: 'nocloud',
+                                    dns: {
+                                        domain: args.domain,
+                                        server: '192.168.88.1',
+                                    },
+                                    datastoreId: 'local-lvm',
+                                    userAccount: {
+                                        username: adminUser,
+                                        keys: [publicKey],
+                                    }
+                                },
+                            }
+                        }
+                        break;
+                    default:
+                        new Error(`size: ${args.size} not supported`);
+                        break;
+                }
 
-                const proxmoxServer = new proxmox.vm.VirtualMachine(`${this.fqdn}`, {
-                    nodeName: 'proxmox',
+                let preConditions = [provider];
+                const defaultVMSettings = {
+                    name: args.hostname,
                     agent: {
+                        enabled: true, // toggles checking for ip addresses through qemu-guest-agent
                         trim: true,
                         type: 'virtio',
                     },
                     cdrom: { enabled: true },
-                    cpu: {
-                        cores: 2,
-                        sockets: 1,
-                    },
-                    initialization: {
-                        type: 'nocloud',
-                        dns: {
-                            domain: args.domain,
-                            server: '192.168.88.1',
-                        },
-                        datastoreId: 'local-lvm',
-                        userAccount: {
-                            username: adminUser,
-                            keys: [publicKey],
-                        }
-                    },
-                    memory: {
-                        dedicated: 2000,
-                    },
-                    name: args.hostname,
                     networkDevices: [
                         {
                             bridge: 'vmbr0',
@@ -113,11 +138,17 @@ export class VirtualMachine extends ComponentResource {
                         },
                     ],
                     onBoot: true,
+                    started: true,
                     operatingSystem: { type: 'l26' },
                     timeoutShutdownVm: 45,
                     timeoutReboot: 45,
-                    vmId: args.vmId,
+                };
+
+                const proxmoxServer = new proxmox.vm.VirtualMachine(`${this.fqdn}`, {
+                    ...defaultVMSettings,
+                    ...templateVMSettings,
                 }, { provider: provider, dependsOn: preConditions });
+                this.cloudID = proxmoxServer.id;
 
                 if (args.proxmoxTemplate) {
                     const proxmoxHostRegexMatches = proxmoxEndpoint?.match(/http.*:\/\/(.*):/);
@@ -130,15 +161,17 @@ export class VirtualMachine extends ComponentResource {
                     // Images can be found at: https://docs.openstack.org/image-guide/obtain-images.html
                     const debTemplatePost = new remote.Command("Post-configure  Debian", {
                         connection: proxmoxConnection,
-                        create: `
-                                            wget -O ${image}.qcow2 ${templateImageURL} 
-                                            qm importdisk ${templateId} ${image}.qcow2 local-lvm
-                                            qm set ${templateId} --scsi0 local-lvm:vm-${templateId}-disk-1
+                        create: interpolate`
+                                            #wget -O ${image}.qcow2 ${templateImageURL} 
+                                            qm importdisk ${this.cloudID} ${image}.qcow2 local-lvm
+                                            qm set ${this.cloudID} --scsi0 local-lvm:vm-${this.cloudID}-disk-1
                                             `
                     }, { dependsOn: [proxmoxServer] });
                     commandsDependsOn.push(debTemplatePost);
                 }
 
+                this.ipv4 = proxmoxServer.ipv4Addresses[0][0];
+                this.ipv6 = proxmoxServer.ipv6Addresses[0][0];
                 break;
             case 'hetzner':
                 const serverType = config.get(`hetzner-vm-${args.size}`) ?? 'cpx11';
@@ -155,6 +188,8 @@ export class VirtualMachine extends ComponentResource {
                     location,
                     sshKeys,
                 }, {});
+
+                this.cloudID = output<string>("-1");
                 this.ipv4 = server.ipv4Address;
                 this.ipv6 = server.ipv6Address;
                 break;
@@ -255,6 +290,11 @@ export class VirtualMachine extends ComponentResource {
             }, {});
         }
         return VirtualMachine.proxmoxProvider;
+    }
+
+    cloudID: Output<string>;
+    getCloudID(): Output<string> {
+        return this.cloudID;
     }
 
     fqdn: string;

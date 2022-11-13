@@ -1,7 +1,8 @@
 import {
     Input,
     Config,
-    log
+    log,
+    getStack
 } from "@pulumi/pulumi";
 import { remote, types } from "@pulumi/command";
 import { VirtualMachine } from '../../resources';
@@ -9,14 +10,15 @@ import { VirtualMachine } from '../../resources';
 const config = new Config();
 const domain = config.require('domain');
 
-const templateProxmoxVM = new VirtualMachine(`debian-11-small-template`, {
-    hostname: `debian-11-small-template`,
+const debian11SmallTemplate = new VirtualMachine(`debian-11-small-template`, {
+    hostname: `debian-11-small-template-${getStack()}`,
     domain: domain,
     cloud: 'proxmox',
-    image: 'debian-11',
-    size: 'small',
+    image: 'debian11',
+    size: 'Small',
     debTemplate: true,
     proxmoxTemplate: true,
 }, {
 });
 
+export const debian11SmallTemplateId = debian11SmallTemplate.getCloudID();
