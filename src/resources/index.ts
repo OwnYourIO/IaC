@@ -25,10 +25,11 @@ export class VirtualMachine extends ComponentResource {
             cloud: 'proxmox' | 'hetzner';
             size: 'Small' | 'Medium' | 'Large';
             additionalSubdomains?: string[];
+            name?: string;
             hostname: string;
             domain?: string;
             installDocker?: boolean;
-            installNetMaker?: boolean;
+            installNetmaker?: boolean;
             installNetclient?: boolean;
             debTemplate?: boolean;
             proxmoxTemplate?: boolean;
@@ -40,6 +41,7 @@ export class VirtualMachine extends ComponentResource {
         opts: {},
     ) {
         super('pkg:index:VirtualMachine', name, {}, opts);
+        args.domain = args.domain ?? 'local';
         this.fqdn = `${args.hostname}.${args.domain}`;
 
         const image = args.image ?? config.get('default-image') ?? 'debian11';
@@ -49,6 +51,8 @@ export class VirtualMachine extends ComponentResource {
         const privateKey = config.getSecret(`${name}-privateKey`) ?? readFileSync(join(homedir(), ".ssh", "id_rsa")).toString("utf8");
 
         const commandsDependsOn: any[] = [];
+
+        let proxmoxConnection: types.input.remote.ConnectionArgs | undefined;
 
         switch (args.cloud) {
             case 'proxmox':
@@ -63,6 +67,7 @@ export class VirtualMachine extends ComponentResource {
 
                 let templateId: Output<any>;
                 let templateImageURL: string;
+                let predefinedHostname: 'debian.local' | undefined;
                 switch (image) {
                     case 'debian11':
                         const env = getStack();
@@ -72,6 +77,7 @@ export class VirtualMachine extends ComponentResource {
                         } else {
                             templateId = concat('');
                         }
+                        predefinedHostname = 'debian.local';
                         templateImageURL = 'https://cdimage.debian.org/images/cloud/bullseye/latest/debian-11-genericcloud-amd64.qcow2';
                         break;
                     default:
@@ -83,10 +89,13 @@ export class VirtualMachine extends ComponentResource {
                 }
 
                 let templateVMSettings = {};
-                switch (args.size) {
-                    case 'Small':
-                        if (args.proxmoxTemplate) {
+                if (args.proxmoxTemplate) {
+                    switch (args.size) {
+                        case 'Small':
                             templateVMSettings = {
+                                ...templateVMSettings,
+                                // Has to be off otherwise the commands to shuffle disks don't work.
+                                started: false,
                                 cpu: {
                                     cores: 2,
                                     sockets: 1,
@@ -94,39 +103,48 @@ export class VirtualMachine extends ComponentResource {
                                 memory: {
                                     dedicated: 2000,
                                 },
-                            }
-                        } else {
-                            templateVMSettings = {
-                                clone: {
-                                    vmId: templateId,
-                                    datastoreId: 'local-lvm',
-                                    full: true,
-                                },
-                                initialization: {
-                                    type: 'nocloud',
-                                    dns: {
-                                        domain: args.domain,
-                                        server: '192.168.88.1',
-                                    },
-                                    datastoreId: 'local-lvm',
-                                    userAccount: {
-                                        username: adminUser,
-                                        keys: [publicKey],
-                                    }
+                                agent: {
+                                    enabled: false,
+                                    trim: true,
+                                    type: 'virtio',
                                 },
                             }
-                        }
-                        break;
-                    default:
-                        new Error(`size: ${args.size} not supported`);
-                        break;
+                            break;
+                        default:
+                            new Error(`size: ${args.size} not supported`);
+                            break;
+                    }
+                } else {
+                    templateVMSettings = {
+                        ...templateVMSettings,
+                        started: true,
+                        reboot: true,
+                        clone: {
+                            vmId: templateId,
+                            datastoreId: 'local-lvm',
+                            full: true,
+                        },
+                    }
                 }
 
                 let preConditions = [provider];
                 const defaultVMSettings = {
-                    name: args.hostname,
+                    name: args.name ?? args.hostname,
+                    hostname: args.hostname,
+                    initialization: {
+                        type: 'nocloud',
+                        dns: {
+                            domain: args.domain ?? 'local',
+                            server: '192.168.88.1',
+                        },
+                        datastoreId: 'local-lvm',
+                        userAccount: {
+                            username: adminUser,
+                            keys: [publicKey],
+                        }
+                    },
                     agent: {
-                        enabled: true, // toggles checking for ip addresses through qemu-guest-agent
+                        enabled: true, // allows checking for ip addresses through qemu-guest-agent
                         trim: true,
                         type: 'virtio',
                     },
@@ -154,24 +172,33 @@ export class VirtualMachine extends ComponentResource {
                     const proxmoxHostRegexMatches = proxmoxEndpoint?.match(/http.*:\/\/(.*):/);
                     const proxmoxHostname = proxmoxHostRegexMatches ? proxmoxHostRegexMatches[1] : '';
 
-                    const proxmoxConnection: types.input.remote.ConnectionArgs = {
+                    proxmoxConnection = {
                         host: proxmoxHostname,
                     };
 
                     // Images can be found at: https://docs.openstack.org/image-guide/obtain-images.html
-                    const debTemplatePost = new remote.Command("Post-configure  Debian", {
+                    const proxmoxTemplatePost = new remote.Command("Add debian image to template VM", {
                         connection: proxmoxConnection,
                         create: interpolate`
                                             #wget -O ${image}.qcow2 ${templateImageURL} 
                                             qm importdisk ${this.cloudID} ${image}.qcow2 local-lvm
                                             qm set ${this.cloudID} --scsi0 local-lvm:vm-${this.cloudID}-disk-1
+                                            # Have to turn the VM on so that the guest-agent can be installed.
+                                            qm start ${this.cloudID}
+                                            until ping -c 1 ${predefinedHostname}; do 
+                                                sleep 5;
+                                            done; 
+                                            qm reboot ${this.cloudID}
+                                            until ping -c 1 ${args.hostname}.local; do 
+                                                sleep 5;
+                                            done; 
                                             `
-                    }, { dependsOn: [proxmoxServer] });
-                    commandsDependsOn.push(debTemplatePost);
+                    }, { dependsOn: commandsDependsOn });
+                    commandsDependsOn.push(proxmoxTemplatePost);
                 }
 
-                this.ipv4 = proxmoxServer.ipv4Addresses[0][0];
-                this.ipv6 = proxmoxServer.ipv6Addresses[0][0];
+                this.ipv4 = proxmoxServer.ipv4Addresses[1][0];
+                this.ipv6 = proxmoxServer.ipv6Addresses[1][0];
                 break;
             case 'hetzner':
                 const serverType = config.get(`hetzner-vm-${args.size}`) ?? 'cpx11';
@@ -187,7 +214,19 @@ export class VirtualMachine extends ComponentResource {
                     image,
                     location,
                     sshKeys,
+                    userData: `
+                        #cloud-config
+                        users:
+                            - 
+                                name: ${adminUser}
+                                #groups: 'users, admin'
+                                sudo: 'ALL=(ALL) NOPASSWD:ALL'
+                                shell: '/bin/bash'
+                                ssh_authorized_keys:
+                                    - ${publicKey}
+                    `
                 }, {});
+                commandsDependsOn.push(server);
 
                 this.cloudID = output<string>("-1");
                 this.ipv4 = server.ipv4Address;
@@ -219,30 +258,58 @@ export class VirtualMachine extends ComponentResource {
             privateKey: privateKey,
         };
 
-        if (args.installNetMaker) {
-            const docker = new remote.Command("Install Docker", {
+        if (args.proxmoxTemplate && proxmoxConnection && args.image === 'debian11') {
+            const installGuestAgent = new remote.Command("Add guest-agent and update.", {
+                connection: connection,
+                create: `export DEBIAN_FRONTEND=noninteractive; 
+                    sudo apt-get update;
+                    sudo apt-get upgrade -y;
+                    sudo apt-get install -y qemu-guest-agent;
+                    sudo systemctl enable qemu-guest-agent;
+                    sudo sh -c 'cat /dev/null > /etc/machine-id';
+                    sudo sh -c 'cat /dev/null > /var/lib/dbus/machine-id';
+                    sudo cloud-init clean;
+                    `
+            }, { dependsOn: commandsDependsOn });
+            commandsDependsOn.push(installGuestAgent);
+
+            const proxmoxTemplatePost = new remote.Command("Remove cloudinit drive", {
+                connection: proxmoxConnection,
+                create: interpolate`
+                        qm stop ${this.cloudID};
+                        qm set ${this.cloudID} --ide2 none;
+                `
+            }, { dependsOn: commandsDependsOn });
+        }
+
+        // TODO: These needs to get abstracted out and exported/imported.
+        if (args.installDocker) {
+            const docker = new remote.Command(`${this.fqdn}: Install Docker`, {
                 connection,
                 create: `export DEBIAN_FRONTEND=noninteractive; 
-                    apt-get update;
-                    apt-get upgrade -y;
-                    apt install curl wget git -y;
-                    curl -fsSL https://get.docker.com | sh;
-                    apt-get install -y docker-compose;
-                    systemctl enable --now docker;
+                    sudo apt-get update;
+                    sudo apt-get upgrade -y;
+                    sudo apt install curl wget git -y;
+                    curl -fsSL https://get.docker.com | sudo sh;
+                    sudo apt-get install -y docker-compose;
+                    sudo systemctl enable --now docker;
             `,
             }, { deleteBeforeReplace: true, dependsOn: commandsDependsOn });
+            commandsDependsOn.push(docker);
+        }
 
+        if (args.installNetmaker) {
             const netmaker = new remote.Command("Install Netmaker", {
                 connection,
                 create: `export DEBIAN_FRONTEND=noninteractive; 
-                    apt-get install -y wireguard ufw;
-                    ufw allow ssh;
-                    ufw allow proto tcp from any to any port 443;
-                    ufw allow 51821:51830/udp;
-                    iptables --policy FORWARD ACCEPT;
-                    systemctl enable --now ufw; 
+                    sudo apt-get install -y wireguard ufw;
+                    sudo ufw allow ssh;
+                    sudo ufw allow proto tcp from any to any port 443;
+                    sudo ufw allow 51821:51830/udp;
+                    sudo iptables --policy FORWARD ACCEPT;
+                    sudo systemctl enable --now ufw; 
                 `,
-            }, { dependsOn: docker, deleteBeforeReplace: true });
+            }, { dependsOn: commandsDependsOn, deleteBeforeReplace: true });
 
             const dockerCompose = new remote.Command("Install Netmaker: Edit docker-compose.yml", {
                 connection,
@@ -255,23 +322,39 @@ export class VirtualMachine extends ComponentResource {
                     sed -i "s/REPLACE_MASTER_KEY/$(tr -dc A-Za-z0-9 </dev/urandom | head -c 30 ; echo '')/g" docker-compose.yml
                     sed -i "s/REPLACE_MQ_ADMIN_PASSWORD/$(tr -dc A-Za-z0-9 </dev/urandom | head -c 30)/g" docker-compose.yml
                 `,
-            }, { deleteBeforeReplace: true });
+            }, { dependsOn: commandsDependsOn, deleteBeforeReplace: true });
 
             const mosquitto = new remote.Command("Install Netmaker: Edit mosquitto config.", {
                 connection,
                 create: `export DEBIAN_FRONTEND=noninteractive; 
-                wget -O mosquitto.conf https://raw.githubusercontent.com/gravitl/netmaker/master/docker/mosquitto.conf;
-                wget -q -O wait.sh https://raw.githubusercontent.com/gravitl/netmaker/develop/docker/wait.sh;
-                chmod +x wait.sh;
+                sudo wget -O /root/mosquitto.conf https://raw.githubusercontent.com/gravitl/netmaker/master/docker/mosquitto.conf;
+                sudo wget -q -O /root/wait.sh https://raw.githubusercontent.com/gravitl/netmaker/develop/docker/wait.sh;
+                sudo chmod +x /root/wait.sh;
                 `,
-            }, { deleteBeforeReplace: true });
+            }, { dependsOn: commandsDependsOn, deleteBeforeReplace: true });
 
-            new remote.Command("Install Netmaker: docker-compose up ", {
+            const netmakerFinished = new remote.Command("Install Netmaker: docker-compose up ", {
                 connection,
                 create: `export DEBIAN_FRONTEND=noninteractive; 
                 sudo docker-compose up -d;
                 `,
-            }, { dependsOn: [dockerCompose, netmaker, mosquitto], deleteBeforeReplace: true });
+            }, { dependsOn: [dockerCompose, netmaker, mosquitto, ...commandsDependsOn], deleteBeforeReplace: true });
+            commandsDependsOn.push(netmakerFinished);
+        }
+
+        if (args.installNetclient) {
+            const netclient = new remote.Command(`${this.fqdn}: Install Netclient`, {
+                connection,
+                create: `export DEBIAN_FRONTEND=noninteractive; 
+                    sudo curl -sL 'https://apt.netmaker.org/gpg.key' | sudo tee /etc/apt/trusted.gpg.d/netclient.asc; 
+                    sudo curl -sL 'https://apt.netmaker.org/debian.deb.txt' | sudo tee /etc/apt/sources.list.d/netclient.list;
+                    sleep 1; # Dumb hack to make sure the files are saved before updating. Failed otherwise. 
+                    sudo apt-get -o DPkg::Lock::Timeout=120 update -y;
+                    sudo apt-get -o DPkg::Lock::Timeout=120 upgrade -y;
+                    sudo apt-get -o DPkg::Lock::Timeout=120 install -y netclient;
+                `,
+            }, { dependsOn: commandsDependsOn, deleteBeforeReplace: true });
+            commandsDependsOn.push(netclient);
         }
     }
 

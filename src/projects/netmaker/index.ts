@@ -17,10 +17,10 @@ const vpnServer = new VirtualMachine('VPN Server', {
     domain,
     additionalSubdomains: ['dashboard.vpn', 'mx.vpn', 'api.vpn', 'broker.vpn'],
     cloud: 'hetzner',
-    size: 'small',
+    size: 'Small',
     dnsProvider: 'cloudflare',
     installDocker: true,
-    installNetMaker: true,
+    installNetmaker: true,
     tlsEmail: 'tms@spencerslab.com',
 }, {
 });
@@ -34,12 +34,9 @@ const vpnIngress = new VirtualMachine('VPN Ingress', {
     size: 'Small',
     image: 'debian11',
     //dnsProvider: 'cloudflare',
-    installDocker: true,
-    installNetMaker: false,
-    installNetclient: false,
+    installNetclient: true,
     tlsEmail: 'tms@spencerslab.com',
 }, {
-    dependsOn: [templateProxmoxVM]
 });
 
 export const vpnIngressIPv4 = vpnIngress.ipv4;

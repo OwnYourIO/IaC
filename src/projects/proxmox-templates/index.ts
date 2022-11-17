@@ -12,7 +12,6 @@ const domain = config.require('domain');
 
 const debian11SmallTemplate = new VirtualMachine(`debian-11-small-template`, {
     hostname: `debian-11-small-template-${getStack()}`,
-    domain: domain,
     cloud: 'proxmox',
     image: 'debian11',
     size: 'Small',
