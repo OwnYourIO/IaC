@@ -10,14 +10,14 @@ import { VirtualMachine } from '../../resources';
 const config = new Config();
 const domain = config.require('domain');
 
-const debian11SmallTemplate = new VirtualMachine(`debian-11-small-template`, {
-    hostname: `debian-11-small-template-${getStack()}`,
+const microOSSmallTemplate = new VirtualMachine(`microos-small-template`, {
+    hostname: `microos-small-template-${getStack()}`,
     cloud: 'proxmox',
-    image: 'debian11',
+    image: 'microos',
     size: 'Small',
-    debTemplate: true,
     proxmoxTemplate: true,
 }, {
 });
+export const microosSmallTemplateId = microOSSmallTemplate.getCloudID();
 
 export const debian11SmallTemplateId = debian11SmallTemplate.getCloudID();

@@ -65,21 +65,27 @@ export class VirtualMachine extends ComponentResource {
                     config.require('proxmox_ve_password')
                 );
 
-                let templateId: Output<any>;
+                let templateId: Output<any> | undefined;
                 let templateImageURL: string;
-                let predefinedHostname: 'debian.local' | undefined;
-                switch (image) {
+                let predefinedHostname: 'debian.local' | 'microos.local' | undefined;
+                const env = getStack();
                     case 'debian11':
-                        const env = getStack();
-                        const templates = new StackReference(`TheHackmeister/proxmox-templates/${env}`);
+                switch (image) {
+                    case 'debian11': {
                         if (!args.proxmoxTemplate) {
                             templateId = templates.getOutput(`${image}${args.size}TemplateId`);
-                        } else {
-                            templateId = concat('');
                         }
                         predefinedHostname = 'debian.local';
                         templateImageURL = 'https://cdimage.debian.org/images/cloud/bullseye/latest/debian-11-genericcloud-amd64.qcow2';
-                        break;
+                    } break;
+                    case 'microos': {
+                        if (!args.proxmoxTemplate) {
+                            templateId = templates.getOutput(`${image}${args.size}TemplateId`);
+                        }
+                        //predefinedHostname = undefine            d;
+                        hasAgentEnbled = false;
+                        templateImageURL = 'https://download.opensuse.org/tumbleweed/appliances/openSUSE-MicroOS.x86_64-ContainerHost-OpenStack-Cloud.qcow2';
+                    } break;
                     default:
                         new Error(`image: ${image} not supported`);
                         // This makes the linter happy. It should never get called.
@@ -180,15 +186,20 @@ export class VirtualMachine extends ComponentResource {
                     const proxmoxTemplatePost = new remote.Command("Add debian image to template VM", {
                         connection: proxmoxConnection,
                         create: interpolate`
-                                            #wget -O ${image}.qcow2 ${templateImageURL} 
+                                            | sha256sum --check  \
+                                            || wget -O ${image}.qcow2 ${templateImageURL} 
+                                            which expect || apt install -y expect
                                             qm importdisk ${this.cloudID} ${image}.qcow2 local-lvm
                                             qm set ${this.cloudID} --scsi0 local-lvm:vm-${this.cloudID}-disk-1
                                             # Have to turn the VM on so that the guest-agent can be installed.
                                             qm start ${this.cloudID}
-                                            until ping -c 1 ${predefinedHostname}; do 
-                                                sleep 5;
+                                            until qm status ${this.cloudID} | grep running; do 
+                                                sleep 1;
                                             done; 
-                                            qm reboot ${this.cloudID}
+                                            sleep 60;
+                                            qm shutdown ${this.cloudID}
+                                            qm wait ${this.cloudID}
+                                            qm start ${this.cloudID}
                                             until ping -c 1 ${args.hostname}.local; do 
                                                 sleep 5;
                                             done; 
@@ -253,33 +264,75 @@ export class VirtualMachine extends ComponentResource {
         }
 
         const connection: types.input.remote.ConnectionArgs = {
-            host: this.ipv4,
+            host: this.ipv4 || args.hostname,
             user: adminUser,
             privateKey: privateKey,
         };
 
-        if (args.proxmoxTemplate && proxmoxConnection && args.image === 'debian11') {
-            const installGuestAgent = new remote.Command("Add guest-agent and update.", {
-                connection: connection,
+        if (args.proxmoxTemplate && proxmoxConnection) {
+            switch (args.image) {
+                case 'debian11':
+                    const installGuestAgent = new remote.Command("Add guest-agent and update.", {
+                        connection: connection,
+                        create: `export DEBIAN_FRONTEND=noninteractive; 
                 create: `export DEBIAN_FRONTEND=noninteractive; 
-                    sudo apt-get update;
-                    sudo apt-get upgrade -y;
-                    sudo apt-get install -y qemu-guest-agent;
-                    sudo systemctl enable qemu-guest-agent;
-                    sudo sh -c 'cat /dev/null > /etc/machine-id';
-                    sudo sh -c 'cat /dev/null > /var/lib/dbus/machine-id';
-                    sudo cloud-init clean;
-                    `
-            }, { dependsOn: commandsDependsOn });
-            commandsDependsOn.push(installGuestAgent);
-
-            const proxmoxTemplatePost = new remote.Command("Remove cloudinit drive", {
-                connection: proxmoxConnection,
-                create: interpolate`
-                        qm stop ${this.cloudID};
-                        qm set ${this.cloudID} --ide2 none;
-                `
-            }, { dependsOn: commandsDependsOn });
+                        create: `export DEBIAN_FRONTEND=noninteractive; 
+                            sudo apt-get update;
+                            sudo apt-get upgrade -y;
+                            sudo apt-get install -y qemu-guest-agent;
+                            sudo systemctl enable qemu-guest-agent;
+                            sudo sh -c 'cat /dev/null > /etc/machine-id';
+                            sudo sh -c 'cat /dev/null > /var/lib/dbus/machine-id';
+                            sudo cloud-init clean;
+                        `
+                    }, { dependsOn: commandsDependsOn });
+                    commandsDependsOn.push(installGuestAgent);
+                    const proxmoxTemplatePost = new remote.Command("Remove cloudinit drive", {
+                        connection: proxmoxConnection,
+                        create: interpolate`
+                                qm stop ${this.cloudID};
+                                qm set ${this.cloudID} --ide2 none;
+                        `
+                    }, { dependsOn: commandsDependsOn });
+                    commandsDependsOn.push(proxmoxTemplatePost);
+                    break;
+                case 'microos': {
+                    const proxmoxTemplatePost = new remote.Command("Remove cloudinit drive", {
+                        connection: proxmoxConnection,
+                        create: interpolate`
+                                qm set ${this.cloudID} --ide2 none;
+                                qm set ${this.cloudID} --agent 1;
+                        `
+                    }, { dependsOn: commandsDependsOn });
+                    commandsDependsOn.push(proxmoxTemplatePost);
+                    const installDockerAndGuestAgent = new remote.Command("Install docker and guest-agent", {
+                        connection: args.proxmoxTemplate ? { ...connection, ...{ host: args.hostname, user: 'root' } } : connection,
+                        create: interpolate`
+                                    transactional-update pkg in -y docker docker-compose qemu-guest-agent system-group-wheel
+                                    reboot&
+                                    exit
+                                `
+                    }, { dependsOn: commandsDependsOn });
+                    commandsDependsOn.push(installDockerAndGuestAgent);
+                    const enableDocker = new remote.Command("Enable docker and guest-agent", {
+                        connection: args.proxmoxTemplate ? { ...connection, ...{ host: args.hostname, user: 'root' } } : connection,
+                        create: interpolate`
+                                    systemctl enable docker
+                                    sed '/%wheel ALL=(ALL:ALL) NOPASSWD: ALL/s/^# //' -i /etc/sudoers
+                                    sed '/Defaults targetpw/s/^/#/g' -i /etc/sudoers
+                                    sed '/ALL   ALL=(ALL) ALL/s/^/#/g' -i /etc/sudoers
+                                    /usr/sbin/usermod -aG wheel ${adminUser}
+                                    sh -c 'cat /dev/null > /etc/machine-id'
+                                    sh -c 'cat /dev/null > /var/lib/dbus/machine-id'
+                                    cloud-init clean
+                                    shutdown 0&
+                                    exit
+                                `
+                    }, { dependsOn: commandsDependsOn });
+                    commandsDependsOn.push(enableDocker);
+                } break
+                default:
+            }
         }
 
         // TODO: These needs to get abstracted out and exported/imported.
