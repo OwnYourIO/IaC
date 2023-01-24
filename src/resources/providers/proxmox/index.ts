@@ -1,10 +1,10 @@
-import { remote, types } from "@pulumi/command";
+import { remote, local, types } from "@pulumi/command";
 import * as proxmox from "@muhlba91/pulumi-proxmoxve";
 
 import { Config, log, concat, interpolate, Input, Output, StackReference, getStack, } from "@pulumi/pulumi";
 
 import { VirtualMachine, VirtualMachineArgs, } from "..";
-import { MicroOS } from '../../images/microos';
+import { MicroOS, MicroOSDesktop } from '../../images/microos';
 import { Debian11 } from '../../images/debian11';
 import { HomeAssistantOS } from '../../images/homeassistant';
 
@@ -24,6 +24,11 @@ export class ProxmoxVM extends VirtualMachine {
             memory: {
                 dedicated: 2000,
             },
+            vga: {
+                enabled: true,
+                memory: 512,
+                type: 'virtio',
+            },
             agent: {
                 enabled: false,
                 trim: true,
@@ -38,6 +43,8 @@ export class ProxmoxVM extends VirtualMachine {
                     server: '192.168.88.1',
                 },
                 userAccount: {
+                    username: this.image.initUser ?? this.adminUser,
+                    password: this.adminPassword,
                     keys: [this.publicKey],
                 }
             },
@@ -71,6 +78,12 @@ export class ProxmoxVM extends VirtualMachine {
             case 'microos':
                 this.microosProxmoxSetup(this.image);
                 break;
+            case 'microos-dvd':
+                this.microosDesktopSetup(this.image);
+                break;
+            case 'debain11':
+                break;
+            case 'homeassistant':
                 break;
 
             default:
@@ -79,7 +92,7 @@ export class ProxmoxVM extends VirtualMachine {
         return this;
     };
 
-    getProxmoxConnection() {
+    get proxmoxConnection() {
         const proxmoxHostRegexMatches = config.require('proxmox_ve_endpoint')?.match(/http.*:\/\/(.*):/);
         const proxmoxHostname = proxmoxHostRegexMatches ? proxmoxHostRegexMatches[1] : '';
 
@@ -105,9 +118,90 @@ export class ProxmoxVM extends VirtualMachine {
         return ProxmoxVM.ProxmoxProvider;
     }
 
+    microosDesktopSetup(image: MicroOSDesktop): any[] {
+        const setupVM = new remote.Command(`${this.fqdn}:setupVm`, {
+            connection: this.proxmoxConnection,
+            create: interpolate`
+                echo "$(curl ${image.getSha256URL()} | cut -f 1 -d ' ')  /var/lib/vz/template/iso/${image.getName()}.iso" \
+                | sha256sum --check || \
+                wget -O /var/lib/vz/template/iso/${image.getName()}.iso ${image.getImageURL()} 
+                qm set ${this.cloudID} --ide1 local:iso/${this.image.getName()}.iso
+                qm set ${this.cloudID} --boot order='scsi0;ide1'
+                qm start ${this.cloudID}
+                until qm status ${this.cloudID} | grep running; do 
+                    sleep 1;
+                done; 
+                
+            `
+        }, { dependsOn: this.commandsDependsOn });
+        this.commandsDependsOn.push(setupVM);
+
+        const waitForStart = new local.Command(`${this.fqdn}:waitForStart`, {
+            create: interpolate`
+                until ping -c 1 ${this.fqdn}; do 
+                    sleep 5;
+                done; 
+            `
+        }, { dependsOn: this.commandsDependsOn });
+        this.commandsDependsOn.push(waitForStart);
+
+        const finalizeVM = new remote.Command(`${this.fqdn}:finalizeVM`, {
+            connection: this.proxmoxConnection,
+            create: interpolate`
+                qm set ${this.cloudID} --ide2 none;
+                qm set ${this.cloudID} --ide3 none;
+                qm set ${this.cloudID} --agent 1;
+                # Have to set it this way because it just doesn't work via pulumi... Pretty sure it's because of all the IDE drives.
+                qm set ${this.cloudID} --machine q35;
+            `
+        }, { dependsOn: this.commandsDependsOn });
+        this.commandsDependsOn.push(finalizeVM);
+
+            create: interpolate`
+                sudo transactional-update run bash -c 'systemctl enable qemu-guest-agent ; 
+                    sed -i "s/^\(Defaults targetpw\)/# \1/" /etc/sudoers ; \
+                    sed -i "s/^\(ALL\s\+ALL=(ALL)\s\+ALL\)/# \1/" /etc/sudoers; ; \
+                    sed -i "s/# \(%wheel\s\+ALL=(ALL:ALL)\s\+NOPASSWD:\s\+ALL\)/\1/" /etc/sudoers ; \
+                '
+                sudo reboot
+            `
+        }, { dependsOn: this.commandsDependsOn });
+        this.commandsDependsOn.push(secureVM);
+
+        const installMediaPlayerDependencies = new remote.Command(`${this.fqdn}:installMediaPlayerDependencies`, {
+            connection: this.vmConnection,
+            create: interpolate`
+                sudo transactional-update run bash -c '
+                    zypper addrepo --refresh https://download.nvidia.com/opensuse/tumbleweed NVIDIA
+                    zypper install nvidia-glG06 x11-video-nvidiaG06 tilix nautilus-extension-tilix
+                '
+                sudo reboot
+            `
+        }, { dependsOn: this.commandsDependsOn });
+        this.commandsDependsOn.push(installMediaPlayerDependencies);
+
+        const configureUser = new remote.Command(`${this.fqdn}:configureUser`, {
+            connection: this.vmConnection,
+            create: interpolate`
+                sudo transactional-update run bash -c '
+                    sed -i "s/DISPLAYMANAGER_AUTOLOGIN=\"\"/DISPLAYMANAGER_AUTOLOGIN=\"${this.adminUser}\"/" /etc/sysconfig/displaymanager
+                    sed -i "s/DISPLAYMANAGER_PASSWORD_LESS_LOGIN=\"no\"/DISPLAYMANAGER_PASSWORD_LESS_LOGIN=\"yes\"/" /etc/sysconfig/displaymanager 
+                '
+                flatpak install -y flathub org.freedesktop.Platform.ffmpeg-full/x86_64/22.08 \
+                    com.valvesoftware.Steam \
+                    io.github.arunsivaramanneo.GPUViewer
+                gsettings set org.gnome.desktop.session idle-delay 0
+                sudo reboot
+            `
+        }, { dependsOn: this.commandsDependsOn });
+        this.commandsDependsOn.push(configureUser);
+
+        return this.commandsDependsOn;
+    }
+
     microosProxmoxSetup(image: MicroOS): any[] {
         const finalized = new remote.Command(`${this.fqdn}:setup-vm`, {
-            connection: this.getProxmoxConnection(),
+            connection: this.proxmoxConnection,
             create: interpolate`
                 echo "$(curl ${image.getSha256URL()} | cut -f 1 -d ' ')  microos.qcow2" \
                 | sha256sum --check || \
@@ -115,6 +209,7 @@ export class ProxmoxVM extends VirtualMachine {
                 which expect || apt install -y expect
                 qm importdisk ${this.cloudID} ${image.getName()}.qcow2 local-lvm
                 qm set ${this.cloudID} --scsi0 local-lvm:vm-${this.cloudID}-disk-1
+
                 # Have to set it this way because it just doesn't work via pulumi.
                 qm set ${this.cloudID} --machine q35;
 

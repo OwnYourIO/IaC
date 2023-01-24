@@ -1,0 +1,7 @@
+name: MediaPlayer
+description: Set up a MicroOS Desktop for playing media and steam
+runtime:
+  name: nodejs
+  options:
+    # See https://github.com/TypeStrong/ts-node/issues/1007
+    nodeargs: "--loader ts-node/esm --no-warnings"

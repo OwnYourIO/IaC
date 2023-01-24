@@ -1,5 +1,5 @@
 import { remote, types } from "@pulumi/command";
-import { Output, ComponentResource, Config, interpolate } from '@pulumi/pulumi';
+import { Output, Input, ComponentResource, Config, interpolate, getStack } from '@pulumi/pulumi';
 
 import { BaseVMImage } from "../images";
 import { Keys } from "../";
@@ -20,11 +20,12 @@ export type VirtualMachineArgs = {
     image: BaseVMImage;
     additionalSubdomains?: string[];
     name?: string;
-    hostname: string;
+    hostname?: string;
     domain?: string;
     installDocker?: boolean;
     tlsEmail?: string;
     adminUser?: string;
+    adminPassword?: string;
 }
 
 export abstract class VirtualMachine extends ComponentResource {
@@ -43,8 +44,10 @@ export abstract class VirtualMachine extends ComponentResource {
     domain: string;
     image: BaseVMImage;
     adminUser: string;
+    adminPassword: string;
     publicKey: string;
     privateKey: string | Output<string>;
+    vmConnection: Input<types.input.remote.ConnectionArgs>;
 
     dnsProvider: string | undefined;
     additionalSubdomains: string[] | undefined;
@@ -57,6 +60,7 @@ export abstract class VirtualMachine extends ComponentResource {
 
         const connection: types.input.remote.ConnectionArgs = {
             host: this.ipv4 || this.hostname,
+            user: this.adminUser,
             privateKey: this.privateKey,
         };
 
@@ -64,6 +68,11 @@ export abstract class VirtualMachine extends ComponentResource {
             this.finalizeVM(connection)
         );
 
+        if (this.installDocker) {
+            this.commandsDependsOn.push(
+                this.installDocker(this.image, this.commandsDependsOn, connection)
+            );
+        }
     }
 
     constructor(
@@ -71,11 +80,20 @@ export abstract class VirtualMachine extends ComponentResource {
         args: VirtualMachineArgs,
         opts: {},
     ) {
-        super('pkg:index:VirtualMachine', name, {}, opts);
-        this.name = args.hostname;
-        this.domain = args.domain = args.domain ?? 'local';
-        this.fqdn = `${args.hostname}.${args.domain}`;
-        this.hostname = args.hostname;
+        let stackStr;
+        if (getStack() !== "main") {
+            stackStr = `-${getStack()}`;
+        }
+        const vmName = `${name}${stackStr ?? ''}`;
+        const hostname = args.hostname ?? vmName;
+        const domain = args.domain ?? 'local';
+        const fqdn = `${hostname}.${domain}`;
+        super('pkg:index:VirtualMachine', fqdn, {}, opts);
+
+        this.name = vmName;
+        this.domain = domain;
+        this.hostname = hostname;
+        this.fqdn = fqdn;
 
         this.dnsProvider = args.dnsProvider;
         this.additionalSubdomains = args.additionalSubdomains;
@@ -83,20 +101,34 @@ export abstract class VirtualMachine extends ComponentResource {
         this.image = args.image ?? config.get('default-image');
 
         this.adminUser = args.adminUser ?? config.get(`default-admin-user`) ?? 'admin';
-        this.publicKey = config.get(`${name}-publicKey`) ?? readFileSync(join(homedir(), ".ssh", "id_rsa.pub")).toString("utf8");
-        this.privateKey = config.getSecret(`${name}-privateKey`) ?? readFileSync(join(homedir(), ".ssh", "id_rsa")).toString("utf8");
+        this.adminPassword = args.adminPassword ?? config.require(`default-admin-password`);
+        this.publicKey = config.get(`${this.name}-publicKey`) ?? readFileSync(join(homedir(), ".ssh", "id_rsa.pub")).toString("utf8");
+        this.privateKey = config.getSecret(`${this.name}-privateKey`) ?? readFileSync(join(homedir(), ".ssh", "id_rsa")).toString("utf8");
+
+        this.vmConnection = {
+            host: this.fqdn,
+            user: this.adminUser,
+            password: this.adminPassword,
+            privateKey: this.privateKey,
+        };
 
         this.commandsDependsOn = [];
 
         this.ipv4 = interpolate``;
         this.ipv6 = interpolate``;
         this.cloudID = interpolate``;
+    }
 
     finalizeVM(
         connection: types.input.remote.ConnectionArgs,
     ): any[] {
+        this.image.finalize(this.commandsDependsOn, connection, this.adminUser);
 
         return this.commandsDependsOn;
     };
 
+    installDocker(image: BaseVMImage, commandsDependsOn: any[], connection: types.input.remote.ConnectionArgs): any[] {
+        commandsDependsOn.push(image.installDocker(commandsDependsOn, connection));
+        return commandsDependsOn;
+    };
 }
