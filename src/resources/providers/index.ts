@@ -1,4 +1,4 @@
-import { remote, types } from "@pulumi/command";
+import { remote, types, local } from "@pulumi/command";
 import { Output, Input, ComponentResource, Config, interpolate, getStack } from '@pulumi/pulumi';
 
 import { BaseVMImage } from "../images";
@@ -54,26 +54,7 @@ export abstract class VirtualMachine extends ComponentResource {
 
     commandsDependsOn: any[]
 
-    createVM(): void {
-        let args: any = {};
-        //}
-
-        const connection: types.input.remote.ConnectionArgs = {
-            host: this.ipv4 || this.hostname,
-            user: this.adminUser,
-            privateKey: this.privateKey,
-        };
-
-        this.commandsDependsOn.push(
-            this.finalizeVM(connection)
-        );
-
-        if (this.installDocker) {
-            this.commandsDependsOn.push(
-                this.installDocker(this.image, this.commandsDependsOn, connection)
-            );
-        }
-    }
+    abstract createVM(): void;
 
     constructor(
         name: string,
@@ -119,16 +100,40 @@ export abstract class VirtualMachine extends ComponentResource {
         this.cloudID = interpolate``;
     }
 
-    finalizeVM(
-        connection: types.input.remote.ConnectionArgs,
-    ): any[] {
-        this.image.finalize(this.commandsDependsOn, connection, this.adminUser);
+    waitForInitConnection(): void {
+    }
 
-        return this.commandsDependsOn;
+    // Some paths won't need initVM (like anything using cloud-init), but it still will be called.
+    // This takes care of getting the VM to be useable by adminUser
+    initVM(): void {
+        const conn = {
+            host: this.fqdn,
+            user: this.image.initUser,
+            password: this.adminPassword,
+            privateKey: this.privateKey,
+        };
+
+        this.commandsDependsOn.push(
+            this.image.initVM(this.commandsDependsOn, conn, this)
+        );
+    }
+
+    waitForConnection(): void {
+        const waitForStart = new local.Command(`${this.fqdn}:waitForConnection`, {
+            create: interpolate`
+                until ping -c 1 ${this.fqdn}; do 
+                    sleep 5;
+                done; 
+            `
+        }, { dependsOn: this.commandsDependsOn });
+        this.commandsDependsOn.push(waitForStart);
+    }
+
     };
 
-    installDocker(image: BaseVMImage, commandsDependsOn: any[], connection: types.input.remote.ConnectionArgs): any[] {
-        commandsDependsOn.push(image.installDocker(commandsDependsOn, connection));
-        return commandsDependsOn;
+    installDocker(): void {
+        this.commandsDependsOn.push(
+            this.image.installDocker(this.commandsDependsOn, this.vmConnection)
+        );
     };
 }

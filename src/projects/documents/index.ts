@@ -5,11 +5,9 @@ import { VirtualMachineFactory } from "../../resources";
 
 const config = new Config();
 const domain = config.require('domain');
-const subdomain = 'paperless';
 
-const paperlessHostname = config.get('paperless-hostname') ?? 'paperless';
-const paperless = VirtualMachineFactory.createVM('VPN Ingress', {
-    hostname: `${paperlessHostname}-${getStack()}`,
+const hostname = config.get('paperless-hostname') ?? 'paperless';
+const paperless = VirtualMachineFactory.createVM(hostname, {
     domain,
     cloud: 'proxmox',
     size: 'Small',

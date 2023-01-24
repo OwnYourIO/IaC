@@ -157,49 +157,12 @@ export class ProxmoxVM extends VirtualMachine {
         }, { dependsOn: this.commandsDependsOn });
         this.commandsDependsOn.push(finalizeVM);
 
-            create: interpolate`
-                sudo transactional-update run bash -c 'systemctl enable qemu-guest-agent ; 
-                    sed -i "s/^\(Defaults targetpw\)/# \1/" /etc/sudoers ; \
-                    sed -i "s/^\(ALL\s\+ALL=(ALL)\s\+ALL\)/# \1/" /etc/sudoers; ; \
-                    sed -i "s/# \(%wheel\s\+ALL=(ALL:ALL)\s\+NOPASSWD:\s\+ALL\)/\1/" /etc/sudoers ; \
-                '
-                sudo reboot
-            `
-        }, { dependsOn: this.commandsDependsOn });
-        this.commandsDependsOn.push(secureVM);
-
-        const installMediaPlayerDependencies = new remote.Command(`${this.fqdn}:installMediaPlayerDependencies`, {
-            connection: this.vmConnection,
-            create: interpolate`
-                sudo transactional-update run bash -c '
-                    zypper addrepo --refresh https://download.nvidia.com/opensuse/tumbleweed NVIDIA
-                    zypper install nvidia-glG06 x11-video-nvidiaG06 tilix nautilus-extension-tilix
-                '
-                sudo reboot
-            `
-        }, { dependsOn: this.commandsDependsOn });
-        this.commandsDependsOn.push(installMediaPlayerDependencies);
-
-        const configureUser = new remote.Command(`${this.fqdn}:configureUser`, {
-            connection: this.vmConnection,
-            create: interpolate`
-                sudo transactional-update run bash -c '
-                    sed -i "s/DISPLAYMANAGER_AUTOLOGIN=\"\"/DISPLAYMANAGER_AUTOLOGIN=\"${this.adminUser}\"/" /etc/sysconfig/displaymanager
-                    sed -i "s/DISPLAYMANAGER_PASSWORD_LESS_LOGIN=\"no\"/DISPLAYMANAGER_PASSWORD_LESS_LOGIN=\"yes\"/" /etc/sysconfig/displaymanager 
-                '
-                flatpak install -y flathub org.freedesktop.Platform.ffmpeg-full/x86_64/22.08 \
-                    com.valvesoftware.Steam \
-                    io.github.arunsivaramanneo.GPUViewer
-                gsettings set org.gnome.desktop.session idle-delay 0
-                sudo reboot
-            `
-        }, { dependsOn: this.commandsDependsOn });
-        this.commandsDependsOn.push(configureUser);
 
         return this.commandsDependsOn;
     }
 
     microosProxmoxSetup(image: MicroOS): any[] {
+        console.log(interpolate`name: ${image.getName()}. URL: ${image.getImageURL()}. IP: ${this.ipv4}`)
         const finalized = new remote.Command(`${this.fqdn}:setup-vm`, {
             connection: this.proxmoxConnection,
             create: interpolate`

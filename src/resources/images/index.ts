@@ -1,11 +1,13 @@
 import { remote, types } from "@pulumi/command";
+import { Input } from "@pulumi/pulumi";
+import { VirtualMachine } from "../providers";
 
 export abstract class BaseVMImage {
     name: string;
     imageURL: string;
-    predefinedHostname: string | undefined;
     guestAgent: boolean = false;
     initUser: string | undefined;
+    initHostname: string = 'localhost';
     constructor(name: string, imageURL: string) {
         this.name = name;
         this.imageURL = imageURL;
@@ -27,8 +29,15 @@ export abstract class BaseVMImage {
         return this.initUser;
     }
 
-    abstract finalize(commandsDependsOn: any[], connection: types.input.remote.ConnectionArgs, adminUser: string): any[];
+    // Most VMs will go through a cloud-init process,
+    // but some won't and will override this function to
+    // configure the VM so that adminUser can login via the fqdn.
+    initVM(commandsDependsOn: any[], connection: types.input.remote.ConnectionArgs, vm: VirtualMachine): any[] {
+        return [];
+    }
 
-    abstract installDocker(commandsDependsOn: any[], connection: types.input.remote.ConnectionArgs): any[];
+    abstract finalize(commandsDependsOn: any[], connection: Input<types.input.remote.ConnectionArgs>, adminUser: string): any[];
+
+    abstract installDocker(commandsDependsOn: any[], connection: Input<types.input.remote.ConnectionArgs>): any[];
 
 }
