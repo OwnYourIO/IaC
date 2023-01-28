@@ -3,7 +3,10 @@ import { Input } from "@pulumi/pulumi";
 import { VirtualMachine } from "../providers";
 
 export abstract class BaseVMImage {
+    // TODO: It's either ts-ignore or a constructor setting bogus attributes.
+    //@ts-ignore
     name: string;
+    //@ts-ignore
     imageURL: string;
     guestAgent: boolean = false;
     initUser: string | undefined;

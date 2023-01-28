@@ -18,11 +18,12 @@ const mediaPlayer = VirtualMachineFactory.createVM('media-player', {
 const installMediaPlayerDependencies = new remote.Command(`${mediaPlayer.fqdn}:installMediaPlayerDependencies`, {
     connection: mediaPlayer.vmConnection,
     create: interpolate`
-        sudo transactional-update run bash -c '
+        ${mediaPlayer.sudo} transactional-update run bash -c ' zypper addrepo https://download.nvidia.com/opensuse/tumbleweed NVIDIA; 
             zypper addrepo --refresh https://download.nvidia.com/opensuse/tumbleweed NVIDIA
             zypper install nvidia-glG06 x11-video-nvidiaG06 tilix nautilus-extension-tilix
         '
-        sudo reboot
+        ${mediaPlayer.sudo} reboot&
+        exit
     `
 }, { dependsOn: mediaPlayer.commandsDependsOn });
 mediaPlayer.commandsDependsOn.push(installMediaPlayerDependencies);
@@ -30,7 +31,7 @@ mediaPlayer.commandsDependsOn.push(installMediaPlayerDependencies);
 const configureUser = new remote.Command(`${mediaPlayer.fqdn}:configureUser`, {
     connection: mediaPlayer.vmConnection,
     create: interpolate`
-        sudo transactional-update run bash -c '
+        ${mediaPlayer.sudo}transactional-update run bash -c '
             sed -i "s/DISPLAYMANAGER_AUTOLOGIN=\"\"/DISPLAYMANAGER_AUTOLOGIN=\"${mediaPlayer.adminUser}\"/" /etc/sysconfig/displaymanager
             sed -i "s/DISPLAYMANAGER_PASSWORD_LESS_LOGIN=\"no\"/DISPLAYMANAGER_PASSWORD_LESS_LOGIN=\"yes\"/" /etc/sysconfig/displaymanager 
         '
@@ -38,7 +39,8 @@ const configureUser = new remote.Command(`${mediaPlayer.fqdn}:configureUser`, {
             com.valvesoftware.Steam \
             io.github.arunsivaramanneo.GPUViewer
         gsettings set org.gnome.desktop.session idle-delay 0
-        sudo reboot
+        ${mediaPlayer.sudo} reboot&
+        exit
     `
 }, { dependsOn: mediaPlayer.commandsDependsOn });
 mediaPlayer.commandsDependsOn.push(configureUser);

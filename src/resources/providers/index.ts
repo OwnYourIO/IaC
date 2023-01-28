@@ -54,6 +54,10 @@ export abstract class VirtualMachine extends ComponentResource {
 
     commandsDependsOn: any[]
 
+    get sudo(): string {
+        return this.image.sudo(this.adminPassword);
+    }
+
     abstract createVM(): void;
 
     constructor(
