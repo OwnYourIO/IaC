@@ -1,9 +1,9 @@
 {
     "devDependencies": {
-        "@types/node": "^18.11.7"
+        "@types/node": "^18.11.18"
     },
     "dependencies": {
-        "@muhlba91/pulumi-proxmoxve": "^1.2.0",
+        "@muhlba91/pulumi-proxmoxve": "2.2.0",
         "@pulumi/cloudflare": "^4.12.1",
         "@pulumi/command": "^0.5.2",
         "@pulumi/hcloud": "^1.10.1",

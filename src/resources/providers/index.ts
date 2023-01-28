@@ -114,13 +114,14 @@ export abstract class VirtualMachine extends ComponentResource {
         };
 
         this.commandsDependsOn.push(
-            this.image.initVM(this.commandsDependsOn, conn, this)
+            this.image.initVM(conn, this)
         );
     }
 
     waitForConnection(): void {
         const waitForStart = new local.Command(`${this.fqdn}:waitForConnection`, {
             create: interpolate`
+                sleep 5; # Make sure the VM has stopped it's network before checking if it's up.
                 until ping -c 1 ${this.fqdn}; do 
                     sleep 5;
                 done; 
@@ -133,7 +134,7 @@ export abstract class VirtualMachine extends ComponentResource {
 
     installDocker(): void {
         this.commandsDependsOn.push(
-            this.image.installDocker(this.commandsDependsOn, this.vmConnection)
+            this.image.installDocker(this.vmConnection, this)
         );
     };
 }

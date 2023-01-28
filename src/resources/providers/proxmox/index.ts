@@ -13,7 +13,6 @@ const config = new Config();
 export class ProxmoxVM extends VirtualMachine {
     private static ProxmoxProvider: proxmox.Provider | undefined;
 
-
     createVM(): VirtualMachine {
         let vmSettings = {
             started: false,
@@ -63,12 +62,37 @@ export class ProxmoxVM extends VirtualMachine {
             timeoutShutdownVm: 45,
             timeoutStopVm: 45,
             timeoutReboot: 45,
+            disks: [{
+                interface: 'scsi0',
+            ]
         };
 
         let preConditions = [ProxmoxVM.getProvider()];
         const proxmoxServer = new proxmox.vm.VirtualMachine(`${this.hostname}`, {
             ...vmSettings,
-        }, { provider: ProxmoxVM.getProvider(), dependsOn: preConditions });
+        }, {
+            provider: ProxmoxVM.getProvider(),
+            dependsOn: preConditions,
+            // Currently the parameters that are assigned to the resource in pulumi
+            // seem like they are the initial values, not what I set... But then cdrom: enabled did so IDK.
+            ignoreChanges: [
+                'started',
+                'bios',
+                'networkDevices',
+                'vga',
+                'cpu',
+                'disks',
+                'keyboardLayout',
+                'memory',
+                'name',
+                'NetworkDevices',
+                'operatingSystem',
+                'serialDevices',
+                'cdrom',
+                'initialization',
+                'agent'
+            ],
+        });
         this.commandsDependsOn.push(proxmoxServer);
 
         this.ipv4 = proxmoxServer.ipv4Addresses[1][0];
@@ -82,8 +106,10 @@ export class ProxmoxVM extends VirtualMachine {
                 this.microosDesktopSetup(this.image);
                 break;
             case 'debain11':
+                this.debian11ProxmoxSetup(this.image);
                 break;
             case 'homeassistant':
+                this.homeassistantProxmoxSetup(this.image);
                 break;
 
             default:
@@ -136,15 +162,6 @@ export class ProxmoxVM extends VirtualMachine {
         }, { dependsOn: this.commandsDependsOn });
         this.commandsDependsOn.push(setupVM);
 
-        const waitForStart = new local.Command(`${this.fqdn}:waitForStart`, {
-            create: interpolate`
-                until ping -c 1 ${this.fqdn}; do 
-                    sleep 5;
-                done; 
-            `
-        }, { dependsOn: this.commandsDependsOn });
-        this.commandsDependsOn.push(waitForStart);
-
         const finalizeVM = new remote.Command(`${this.fqdn}:finalizeVM`, {
             connection: this.proxmoxConnection,
             create: interpolate`
@@ -157,13 +174,11 @@ export class ProxmoxVM extends VirtualMachine {
         }, { dependsOn: this.commandsDependsOn });
         this.commandsDependsOn.push(finalizeVM);
 
-
         return this.commandsDependsOn;
     }
 
     microosProxmoxSetup(image: MicroOS): any[] {
-        console.log(interpolate`name: ${image.getName()}. URL: ${image.getImageURL()}. IP: ${this.ipv4}`)
-        const finalized = new remote.Command(`${this.fqdn}:setup-vm`, {
+        const setupVM = new remote.Command(`${this.fqdn}:setup-vm`, {
             connection: this.proxmoxConnection,
             create: interpolate`
                 echo "$(curl ${image.getSha256URL()} | cut -f 1 -d ' ')  microos.qcow2" \
@@ -172,9 +187,6 @@ export class ProxmoxVM extends VirtualMachine {
                 which expect || apt install -y expect
                 qm importdisk ${this.cloudID} ${image.getName()}.qcow2 local-lvm
                 qm set ${this.cloudID} --scsi0 local-lvm:vm-${this.cloudID}-disk-1
-
-                # Have to set it this way because it just doesn't work via pulumi.
-                qm set ${this.cloudID} --machine q35;
 
                 # Have to turn the VM on so that the guest - agent can be installed.
                 qm start ${this.cloudID}
@@ -187,10 +199,6 @@ export class ProxmoxVM extends VirtualMachine {
                 echo "post sleep"
                 qm shutdown ${this.cloudID}
 
-                qm set ${this.cloudID} --ide2 none;
-                qm set ${this.cloudID} --ide3 none;
-                qm set ${this.cloudID} --agent 1;
-
                 qm wait ${this.cloudID}
                 qm start ${this.cloudID}
                 until ping -c 1 ${this.hostname}; do 
@@ -198,8 +206,53 @@ export class ProxmoxVM extends VirtualMachine {
                 done; 
             `
         }, { dependsOn: this.commandsDependsOn });
-        this.commandsDependsOn.push(finalized);
+        this.commandsDependsOn.push(setupVM);
+
+        const finalizeVM = new remote.Command(`${this.fqdn}:finalizeVM`, {
+            connection: this.proxmoxConnection,
+            create: interpolate`
+                qm set ${this.cloudID} --ide2 none;
+                qm set ${this.cloudID} --ide3 none;
+                qm set ${this.cloudID} --agent 1;
+
+                # Have to set it this way because it just doesn't work via pulumi.
+                # Or the interface. I think it had something to do with all the IDE drives attached. 
+                # Once I removed those, I think this worked?
+                qm set ${this.cloudID} --machine q35;
+                qm set ${this.cloudID} --vga none;
+            `
+        }, { dependsOn: this.commandsDependsOn });
+        this.commandsDependsOn.push(finalizeVM);
 
         return this.commandsDependsOn;
     }
 
+    debian11ProxmoxSetup(image: Debian11): any[] {
+        const proxmoxSetup = new remote.Command("Remove cloudinit drive", {
+            connection: this.proxmoxConnection,
+            create: interpolate`
+                qm stop ${this.cloudID};
+                qm set ${this.cloudID} --ide2 none;
+            `
+        }, { dependsOn: this.commandsDependsOn });
+        this.commandsDependsOn.push(proxmoxSetup);
+
+        return this.commandsDependsOn;
+    }
+
+    homeassistantProxmoxSetup(image: HomeAssistantOS): any[] {
+        const proxmoxSetup = new remote.Command("Remove cloudinit drive", {
+            connection: this.proxmoxConnection,
+            create: interpolate`
+                qm wait ${this.cloudID}
+                qm start ${this.cloudID}
+                until ping -c 1 ${this.hostname}; do 
+                    sleep 5;
+                done; 
+            `
+        }, { dependsOn: this.commandsDependsOn });
+        this.commandsDependsOn.push(proxmoxSetup);
+
+        return this.commandsDependsOn;
+    }
+}

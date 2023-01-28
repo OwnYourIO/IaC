@@ -7,8 +7,7 @@ const config = new Config();
 const domain = config.require('domain');
 
 const hostname = config.get('media-player-hostname') ?? 'media-player';
-const mediaPlayer = VirtualMachineFactory.createVM('media-player-vm', {
-    hostname: `${hostname}-${getStack()}`,
+const mediaPlayer = VirtualMachineFactory.createVM('media-player', {
     domain,
     cloud: 'proxmox',
     size: 'Small',

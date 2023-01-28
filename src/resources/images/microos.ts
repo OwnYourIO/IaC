@@ -5,11 +5,13 @@ import { VirtualMachine } from "../providers";
 
 export class MicroOS extends BaseVMImage {
     constructor() {
-        super('microos', 'https://download.opensuse.org/tumbleweed/appliances/openSUSE-MicroOS.x86_64-OpenStack-Cloud.qcow2');
+        super();
+        this.name = 'microos';
+        this.imageURL = 'https://download.opensuse.org/tumbleweed/appliances/openSUSE-MicroOS.x86_64-OpenStack-Cloud.qcow2';
         this.initUser = 'root';
     }
 
-    initVM(commandsDependsOn: any[], connection: types.input.remote.ConnectionArgs, vm: VirtualMachine): any[] {
+    initVM(connection: types.input.remote.ConnectionArgs, vm: VirtualMachine): any[] {
         const waitForInitialConnection = new local.Command(`${vm.fqdn}:waitForInitialConnection`, {
             create: interpolate`
                 until ping -c 1 ${vm.fqdn}; do 
@@ -20,61 +22,47 @@ export class MicroOS extends BaseVMImage {
         vm.commandsDependsOn.push(waitForInitialConnection);
 
         const secureVM = new remote.Command(`${vm.fqdn}:secureVM`, {
-
             connection: connection,
-            create: interpolate`
-                sudo transactional-update run bash -c 'systemctl enable qemu-guest-agent ; 
-                    sed -i "s/^\(Defaults targetpw\)/# \1/" /etc/sudoers ; \
-                    sed -i "s/^\(ALL\s\+ALL=(ALL)\s\+ALL\)/# \1/" /etc/sudoers; ; \
-                    sed -i "s/# \(%wheel\s\+ALL=(ALL:ALL)\s\+NOPASSWD:\s\+ALL\)/\1/" /etc/sudoers ; \
+            create: interpolate`transactional-update run bash -c 'zypper install -y qemu-guest-agent system-group-wheel; 
+                systemctl enable qemu-guest-agent;
+                sed -i "s/^\\(Defaults targetpw\\)/# \\1/" /etc/sudoers ; 
+                sed -i "s/^\\(ALL\\s\\+ALL=(ALL)\\s\\+ALL\\)/# \\1/" /etc/sudoers; 
+                sed -i "s/# \\(.wheel\\s\\+ALL=(ALL:ALL)\\s\\+NOPASSWD:\\s\\+ALL\\)/\\1/" /etc/sudoers ; 
+                usermod -aG wheel ${vm.adminUser} ;
                 '
-                sudo reboot
-            `
-        }, { dependsOn: commandsDependsOn });
+                reboot&
+                exit`
+        }, { dependsOn: vm.commandsDependsOn });
 
         return [secureVM];
     }
 
-    finalize(commandsDependsOn: any[], connection: types.input.remote.ConnectionArgs, adminUser: string): any[] {
+    finalize(connection: types.input.remote.ConnectionArgs, vm: VirtualMachine): any[] {
 
-        return commandsDependsOn;
+        return vm.commandsDependsOn;
     }
 
-    installDocker(commandsDependsOn: any[], connection: types.input.remote.ConnectionArgs): any[] {
+    installDocker(connection: types.input.remote.ConnectionArgs, vm: VirtualMachine): any[] {
+        const installDockerAndGuestAgent = new remote.Command(`${vm.fqdn}-install-docker`, {
             connection,
-            create: `
-                transactional-update pkg in -y docker docker-compose 
+            create: `transactional-update run bash -c 'zypper install -y docker docker-compose; 
+                    systemctl enable --now docker
+                '
                 reboot&
                 exit
             `
-        }, { dependsOn: commandsDependsOn });
-        commandsDependsOn.push(installDockerAndGuestAgent);
+        }, { dependsOn: vm.commandsDependsOn });
+        vm.commandsDependsOn.push(installDockerAndGuestAgent);
 
-        const enableDocker = new remote.Command("Enable docker", {
-            connection,
-            create: `
-                systemctl enable --now docker
-                #reboot&
-                exit
-            `
-        }, { dependsOn: commandsDependsOn });
-        commandsDependsOn.push(enableDocker);
-
-        return commandsDependsOn;
+        return vm.commandsDependsOn;
     }
 }
 
-export class MicroOSDesktop extends BaseVMImage {
+export class MicroOSDesktop extends MicroOS {
     constructor() {
-        super('microos-dvd', 'https://download.opensuse.org/tumbleweed/iso/openSUSE-MicroOS-DVD-x86_64-Current.iso');
+        super();
+        this.name = 'microos-dvd';
+        this.imageURL = 'https://download.opensuse.org/tumbleweed/iso/openSUSE-MicroOS-DVD-x86_64-Current.iso';
     }
 
-    finalize(commandsDependsOn: any[], connection: types.input.remote.ConnectionArgs, adminUser: string): any[] {
-
-        return commandsDependsOn;
-    }
-
-    installDocker(commandsDependsOn: any[], connection: types.input.remote.ConnectionArgs): any[] {
-        return commandsDependsOn;
-    }
 }
