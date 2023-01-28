@@ -12,6 +12,10 @@ export abstract class BaseVMImage {
     initUser: string | undefined;
     initHostname: string = 'localhost';
 
+    sudo(password: string): string {
+        return ` echo "${password}" | sudo -S `;
+    }
+
     getName() {
         return this.name;
     }

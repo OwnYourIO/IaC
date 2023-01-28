@@ -10,7 +10,7 @@ const hostname = config.get('media-player-hostname') ?? 'media-player';
 const mediaPlayer = VirtualMachineFactory.createVM('media-player', {
     domain,
     cloud: 'proxmox',
-    size: 'Small',
+    size: 'Large',
     image: new MicroOSDesktop(),
 }, {
 });

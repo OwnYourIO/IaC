@@ -13,10 +13,27 @@ import { homedir } from "os";
 
 const config = new Config();
 
+export type Size = {
+    cores: number,
+    baseMemory: number
+};
+const sizes = {
+    'Small': {
+        cores: 2,
+        baseMemory: 2000
+    }, 'Medium': {
+        cores: 4,
+        baseMemory: 4000
+    }, 'Large': {
+        cores: 8,
+        baseMemory: 16000
+    }
+};
+
 export type VirtualMachineArgs = {
     dnsProvider?: 'cloudflare' | 'hetzner';
     cloud: Keys;
-    size: 'Small' | 'Medium' | 'Large';
+    size: keyof typeof sizes;
     image: BaseVMImage;
     additionalSubdomains?: string[];
     name?: string;
@@ -39,6 +56,8 @@ export abstract class VirtualMachine extends ComponentResource {
     templateImageURL: string | undefined;
     ipv4: Output<string>;
     ipv6: Output<string>;
+
+    size: Size;
 
     name: string;
     domain: string;
@@ -84,6 +103,8 @@ export abstract class VirtualMachine extends ComponentResource {
         this.additionalSubdomains = args.additionalSubdomains;
 
         this.image = args.image ?? config.get('default-image');
+
+        this.size = sizes[args.size];
 
         this.adminUser = args.adminUser ?? config.get(`default-admin-user`) ?? 'admin';
         this.adminPassword = args.adminPassword ?? config.require(`default-admin-password`);

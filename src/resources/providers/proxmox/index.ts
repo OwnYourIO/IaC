@@ -17,11 +17,11 @@ export class ProxmoxVM extends VirtualMachine {
         let vmSettings = {
             started: false,
             cpu: {
-                cores: 2,
+                cores: this.size.cores,
                 sockets: 1,
             },
             memory: {
-                dedicated: 2000,
+                dedicated: this.size.baseMemory,
             },
             vga: {
                 enabled: true,
