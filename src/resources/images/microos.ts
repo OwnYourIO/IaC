@@ -22,15 +22,14 @@ export class MicroOS extends BaseVMImage {
         vm.commandsDependsOn.push(waitForInitialConnection);
 
         const secureVM = new remote.Command(`${vm.fqdn}:secureVM`, {
-            connection: connection,
-            create: interpolate`transactional-update run bash -c 'zypper install -y qemu-guest-agent system-group-wheel; 
+            connection: vm.initConnection,
+            create: interpolate`${this.sudo(vm.adminPassword)} transactional-update run bash -c 'zypper install -y qemu-guest-agent system-group-wheel; 
                 systemctl enable qemu-guest-agent;
                 sed -i "s/^\\(Defaults targetpw\\)/# \\1/" /etc/sudoers ; 
                 sed -i "s/^\\(ALL\\s\\+ALL=(ALL)\\s\\+ALL\\)/# \\1/" /etc/sudoers; 
                 sed -i "s/# \\(.wheel\\s\\+ALL=(ALL:ALL)\\s\\+NOPASSWD:\\s\\+ALL\\)/\\1/" /etc/sudoers ; 
-                usermod -aG wheel ${vm.adminUser} ;
                 '
-                reboot&
+                ${this.sudo(vm.adminPassword)} reboot&
                 exit`
         }, { dependsOn: vm.commandsDependsOn });
 
@@ -45,10 +44,10 @@ export class MicroOS extends BaseVMImage {
     installDocker(connection: types.input.remote.ConnectionArgs, vm: VirtualMachine): any[] {
         const installDockerAndGuestAgent = new remote.Command(`${vm.fqdn}-install-docker`, {
             connection,
-            create: `transactional-update run bash -c 'zypper install -y docker docker-compose; 
+            create: `${this.sudo(vm.adminPassword)} transactional-update run bash -c 'zypper install -y docker docker-compose; 
                     systemctl enable --now docker
                 '
-                reboot&
+                ${this.sudo(vm.adminPassword)} reboot&
                 exit
             `
         }, { dependsOn: vm.commandsDependsOn });

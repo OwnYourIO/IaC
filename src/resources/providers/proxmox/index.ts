@@ -118,14 +118,14 @@ export class ProxmoxVM extends VirtualMachine {
         return this;
     };
 
-    get proxmoxConnection() {
+    get providerConnection() {
         const proxmoxHostRegexMatches = config.require('proxmox_ve_endpoint')?.match(/http.*:\/\/(.*):/);
         const proxmoxHostname = proxmoxHostRegexMatches ? proxmoxHostRegexMatches[1] : '';
 
-        let proxmoxConnection = {
+        let providerConnection = {
             host: proxmoxHostname,
         };
-        return proxmoxConnection;
+        return providerConnection;
     }
 
     private static getProvider(): proxmox.Provider {
@@ -145,8 +145,8 @@ export class ProxmoxVM extends VirtualMachine {
     }
 
     microosDesktopSetup(image: MicroOSDesktop): any[] {
-        const setupVM = new remote.Command(`${this.fqdn}:setupVm`, {
-            connection: this.proxmoxConnection,
+        const startVM = new remote.Command(`${this.fqdn}:startVm`, {
+            connection: this.providerConnection,
             create: interpolate`
                 echo "$(curl ${image.getSha256URL()} | cut -f 1 -d ' ')  /var/lib/vz/template/iso/${image.getName()}.iso" \
                 | sha256sum --check || \
@@ -157,16 +157,16 @@ export class ProxmoxVM extends VirtualMachine {
                 until qm status ${this.cloudID} | grep running; do 
                     sleep 1;
                 done; 
-                
             `
         }, { dependsOn: this.commandsDependsOn });
-        this.commandsDependsOn.push(setupVM);
+        this.commandsDependsOn.push(startVM);
 
         const finalizeVM = new remote.Command(`${this.fqdn}:finalizeVM`, {
-            connection: this.proxmoxConnection,
+            connection: this.providerConnection,
             create: interpolate`
-                qm set ${this.cloudID} --ide2 none;
-                qm set ${this.cloudID} --ide3 none;
+                qm set ${this.cloudID} --delete ide1;
+                qm set ${this.cloudID} --delete ide2;
+                qm set ${this.cloudID} --delete ide3;
                 qm set ${this.cloudID} --agent 1;
                 # Have to set it this way because it just doesn't work via pulumi... Pretty sure it's because of all the IDE drives.
                 qm set ${this.cloudID} --machine q35;
@@ -178,8 +178,8 @@ export class ProxmoxVM extends VirtualMachine {
     }
 
     microosProxmoxSetup(image: MicroOS): any[] {
-        const setupVM = new remote.Command(`${this.fqdn}:setup-vm`, {
-            connection: this.proxmoxConnection,
+        const startVM = new remote.Command(`${this.fqdn}:startVM`, {
+            connection: this.providerConnection,
             create: interpolate`
                 echo "$(curl ${image.getSha256URL()} | cut -f 1 -d ' ')  microos.qcow2" \
                 | sha256sum --check || \
@@ -206,10 +206,10 @@ export class ProxmoxVM extends VirtualMachine {
                 done; 
             `
         }, { dependsOn: this.commandsDependsOn });
-        this.commandsDependsOn.push(setupVM);
+        this.commandsDependsOn.push(startVM);
 
         const finalizeVM = new remote.Command(`${this.fqdn}:finalizeVM`, {
-            connection: this.proxmoxConnection,
+            connection: this.providerConnection,
             create: interpolate`
                 qm set ${this.cloudID} --ide2 none;
                 qm set ${this.cloudID} --ide3 none;
@@ -219,7 +219,6 @@ export class ProxmoxVM extends VirtualMachine {
                 # Or the interface. I think it had something to do with all the IDE drives attached. 
                 # Once I removed those, I think this worked?
                 qm set ${this.cloudID} --machine q35;
-                qm set ${this.cloudID} --vga none;
             `
         }, { dependsOn: this.commandsDependsOn });
         this.commandsDependsOn.push(finalizeVM);
@@ -229,7 +228,7 @@ export class ProxmoxVM extends VirtualMachine {
 
     debian11ProxmoxSetup(image: Debian11): any[] {
         const proxmoxSetup = new remote.Command("Remove cloudinit drive", {
-            connection: this.proxmoxConnection,
+            connection: this.providerConnection,
             create: interpolate`
                 qm stop ${this.cloudID};
                 qm set ${this.cloudID} --ide2 none;
@@ -242,7 +241,7 @@ export class ProxmoxVM extends VirtualMachine {
 
     homeassistantProxmoxSetup(image: HomeAssistantOS): any[] {
         const proxmoxSetup = new remote.Command("Remove cloudinit drive", {
-            connection: this.proxmoxConnection,
+            connection: this.providerConnection,
             create: interpolate`
                 qm wait ${this.cloudID}
                 qm start ${this.cloudID}

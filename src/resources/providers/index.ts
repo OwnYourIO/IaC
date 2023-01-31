@@ -67,6 +67,11 @@ export abstract class VirtualMachine extends ComponentResource {
     publicKey: string;
     privateKey: string | Output<string>;
     vmConnection: Input<types.input.remote.ConnectionArgs>;
+    initConnection: Input<types.input.remote.ConnectionArgs>;
+    waitForConnectionCount: number;
+
+    abstract get providerConnection(): Input<types.input.remote.ConnectionArgs>;
+
 
     dnsProvider: string | undefined;
     additionalSubdomains: string[] | undefined;
@@ -90,7 +95,7 @@ export abstract class VirtualMachine extends ComponentResource {
         }
         const vmName = `${name}${stackStr ?? ''}`;
         const hostname = args.hostname ?? vmName;
-        const domain = args.domain ?? 'local';
+        const domain = args.domain ?? config.get('domain') ?? 'local';
         const fqdn = `${hostname}.${domain}`;
         super('pkg:index:VirtualMachine', fqdn, {}, opts);
 
@@ -118,6 +123,9 @@ export abstract class VirtualMachine extends ComponentResource {
             privateKey: this.privateKey,
         };
 
+        this.initConnection = this.vmConnection;
+        this.waitForConnectionCount = 0;
+
         this.commandsDependsOn = [];
 
         this.ipv4 = interpolate``;
@@ -144,9 +152,10 @@ export abstract class VirtualMachine extends ComponentResource {
     }
 
     waitForConnection(): void {
-        const waitForStart = new local.Command(`${this.fqdn}:waitForConnection`, {
+        this.waitForConnectionCount++;
+        const waitForStart = new local.Command(`${this.fqdn}:waitForConnection#${this.waitForConnectionCount}`, {
             create: interpolate`
-                sleep 5; # Make sure the VM has stopped it's network before checking if it's up.
+                sleep 10; # Make sure the VM has stopped it's network before checking if it's up.
                 until ping -c 1 ${this.fqdn}; do 
                     sleep 5;
                 done; 
