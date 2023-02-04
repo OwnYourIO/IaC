@@ -26,12 +26,11 @@ export class VirtualMachineFactory {
             const vm = new providerMap[args.cloud](name, args, opts);
             // Create and start the VM object
             vm.createVM();
+
             // This gets the system to a generally usable state. 
             // Sets up adminUser's initial profile and permissions.
             // And makes sure the VM is accessible via IP or fqdn.
             vm.initVM();
-
-            vm.waitForConnection();
 
             vm.finalizeVM();
 

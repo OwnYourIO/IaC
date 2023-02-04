@@ -11,28 +11,45 @@ export class MicroOS extends BaseVMImage {
         this.initUser = 'root';
     }
 
+    sudo(password: string) {
+        return 'sudo';
+    }
+
     initVM(connection: types.input.remote.ConnectionArgs, vm: VirtualMachine): any[] {
-        const waitForInitialConnection = new local.Command(`${vm.fqdn}:waitForInitialConnection`, {
-            create: interpolate`
-                until ping -c 1 ${vm.fqdn}; do 
-                    sleep 5;
-                done; 
-            `
-        }, { dependsOn: vm.commandsDependsOn });
-        vm.commandsDependsOn.push(waitForInitialConnection);
-
-        const secureVM = new remote.Command(`${vm.fqdn}:secureVM`, {
+        // This sets the password if one is provided. 
+        const setPasswordCommand = vm.adminPassword ?
+            ` echo -e '${vm.adminPassword}'"\n"'${vm.adminPassword}' | passwd ${vm.adminUser}`
+            : '';
+        const secureVM = vm.run('secureVM', {
             connection: vm.initConnection,
-            create: interpolate`${this.sudo(vm.adminPassword)} transactional-update run bash -c 'zypper install -y qemu-guest-agent system-group-wheel; 
-                systemctl enable qemu-guest-agent;
-                sed -i "s/^\\(Defaults targetpw\\)/# \\1/" /etc/sudoers ; 
-                sed -i "s/^\\(ALL\\s\\+ALL=(ALL)\\s\\+ALL\\)/# \\1/" /etc/sudoers; 
-                sed -i "s/# \\(.wheel\\s\\+ALL=(ALL:ALL)\\s\\+NOPASSWD:\\s\\+ALL\\)/\\1/" /etc/sudoers ; 
+            waitForStart: true,
+            waitForReboot: true,
+            create: interpolate`transactional-update run bash -c 'zypper install -y qemu-guest-agent system-group-wheel; 
+                    systemctl enable qemu-guest-agent
+                    sed -i "s/^\\(Defaults targetpw\\)/# \\1/" /etc/sudoers
+                    sed -i "s/^\\(ALL\\s\\+ALL=(ALL)\\s\\+ALL\\)/# \\1/" /etc/sudoers
+                    sed -i "s/# \\(.wheel\\s\\+ALL=(ALL:ALL)\\s\\+NOPASSWD:\\s\\+ALL\\)/\\1/" /etc/sudoers
+                    growpart /dev/sda 4
                 '
-                ${this.sudo(vm.adminPassword)} reboot&
-                exit`
-        }, { dependsOn: vm.commandsDependsOn });
+                reboot&
+                exit
+            `
+        });
 
+        vm.run('addAdminUser', {
+            connection: vm.initConnection,
+            waitForReboot: true,
+            create: interpolate`
+                useradd -m ${vm.adminUser}
+                usermod -aG wheel ${vm.adminUser}
+                ${setPasswordCommand}
+                mkdir /home/${vm.adminUser}/.ssh/
+                echo -e "${vm.publicKey}" >> /home/${vm.adminUser}/.ssh/authorized_keys
+                chown -R ${vm.adminUser}:${vm.adminUser} /home/${vm.adminUser}/.ssh/
+                ${this.sudo(vm.adminPassword)} reboot&
+                exit
+            `
+        });
         return [secureVM];
     }
 

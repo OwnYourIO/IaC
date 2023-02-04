@@ -68,7 +68,7 @@ export abstract class VirtualMachine extends ComponentResource {
     privateKey: string | Output<string>;
     vmConnection: Input<types.input.remote.ConnectionArgs>;
     initConnection: Input<types.input.remote.ConnectionArgs>;
-    waitForConnectionCount: number;
+    waitForPingCount: number;
 
     abstract get providerConnection(): Input<types.input.remote.ConnectionArgs>;
 
@@ -124,7 +124,7 @@ export abstract class VirtualMachine extends ComponentResource {
         };
 
         this.initConnection = this.vmConnection;
-        this.waitForConnectionCount = 0;
+        this.waitForPingCount = 0;
 
         this.commandsDependsOn = [];
 
@@ -151,16 +151,48 @@ export abstract class VirtualMachine extends ComponentResource {
         );
     }
 
-    waitForConnection(): void {
-        this.waitForConnectionCount++;
-        const waitForStart = new local.Command(`${this.fqdn}:waitForConnection#${this.waitForConnectionCount}`, {
+    run(name: string, args: {
+        connection: Connection,
+        create: Output<string>,
+        waitForReboot?: boolean,
+        waitForStart?: boolean,
+        doNotDependOn?: boolean,
+        delete?: Output<string>
+    }): void {
+        if (args.waitForStart) {
+            this.waitForPing(undefined, undefined);
+        }
+        const cmd = new remote.Command(`${this.fqdn}:${name}`, {
+            connection: args.connection,
+            create: args.create,
+            delete: args.delete,
+        }, {
+            dependsOn: this.commandsDependsOn,
+        });
+
+        if (args.waitForReboot) {
+            this.waitForPing(cmd, `${this.fqdn}:${name}`);
+            return;
+        }
+
+        if (!args.doNotDependOn) {
+            this.commandsDependsOn.push(cmd);
+        }
+    }
+
+    waitForPing(parent?: remote.Command | undefined, name?: string | undefined): void {
+        this.waitForPingCount++;
+        const waitForStart = new local.Command(`${this.fqdn}:waitForPing(${this.waitForPingCount})`, {
             create: interpolate`
                 sleep 10; # Make sure the VM has stopped it's network before checking if it's up.
                 until ping -c 1 ${this.fqdn}; do 
                     sleep 5;
                 done; 
             `
-        }, { dependsOn: this.commandsDependsOn });
+        }, {
+            dependsOn: this.commandsDependsOn,
+            parent: parent,
+        });
         this.commandsDependsOn.push(waitForStart);
     }
 

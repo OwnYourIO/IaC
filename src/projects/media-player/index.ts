@@ -1,6 +1,6 @@
 import { Config, getStack, interpolate, log, } from "@pulumi/pulumi";
 import { remote, types } from "@pulumi/command";
-import { MicroOSDesktop } from '../../resources/images/microos';
+import { MicroOS } from '../../resources/images/microos';
 import { VirtualMachineFactory } from "../../resources";
 
 const config = new Config();
@@ -11,38 +11,43 @@ const mediaPlayer = VirtualMachineFactory.createVM('media-player', {
     domain,
     cloud: 'proxmox',
     size: 'Large',
-    image: new MicroOSDesktop(),
+    image: new MicroOS(),
 }, {
 });
 
-const installMediaPlayerDependencies = new remote.Command(`${mediaPlayer.fqdn}:installMediaPlayerDependencies`, {
+mediaPlayer.run('installDesktop', {
     connection: mediaPlayer.vmConnection,
+    waitForReboot: true,
     create: interpolate`
-        ${mediaPlayer.sudo} transactional-update run bash -c ' zypper addrepo --refresh https://download.nvidia.com/opensuse/tumbleweed NVIDIA; 
-            zypper --gpg-auto-import-keys ref;
-            zypper -n install --auto-agree-with-licenses \
-                nvidia-glG06 nvidia-video-G06 nvidia-driver-G06-kmp-default kernel-firmware-nvidia-gsp-G06 \
-                kernel-firmware-iwlwifi kernel-firmware-bluetooth \
+        ${mediaPlayer.sudo} transactional-update run bash -c '
+            zypper -n install -t pattern \
+                gnome_x11 \
+                microos_gnome_desktop \
+                microos_selinux \
+                games
+            zypper -n install \
                 tilix nautilus-extension-tilix
             systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
+            systemctl set-default graphical.target
             exit
         '
+        #${mediaPlayer.sudo} flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
         ${mediaPlayer.sudo} reboot&
         exit
     `
-}, { dependsOn: mediaPlayer.commandsDependsOn });
-mediaPlayer.commandsDependsOn.push(installMediaPlayerDependencies);
+});
 
-mediaPlayer.waitForConnection();
-
-const configureUser = new remote.Command(`${mediaPlayer.fqdn}:configureUser`, {
+mediaPlayer.run(`configureUserspace`, {
     connection: mediaPlayer.vmConnection,
+    waitForReboot: true,
     create: interpolate`
-        ${mediaPlayer.sudo}transactional-update run bash -c '
+        ${mediaPlayer.sudo} transactional-update run bash -c '
             sed -i "s/DISPLAYMANAGER_AUTOLOGIN=.*\\"/DISPLAYMANAGER_AUTOLOGIN=\\"${mediaPlayer.adminUser}\\"/" /etc/sysconfig/displaymanager
             sed -i "s/DISPLAYMANAGER_PASSWORD_LESS_LOGIN=\\"no\\"/DISPLAYMANAGER_PASSWORD_LESS_LOGIN=\\"yes\\"/" /etc/sysconfig/displaymanager 
         '
-        flatpak install -y flathub org.freedesktop.Platform.ffmpeg-full/x86_64/22.08 \
+        flatpak --user remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+        flatpak --user install -y org.mozilla.firefox \
+            org.freedesktop.Platform.ffmpeg-full/x86_64/22.08 \
             com.valvesoftware.Steam \
             org.freedesktop.Platform.GL.nvidia-525-85-05  \
             org.freedesktop.Platform.GL32.nvidia-525-85-05  \
@@ -65,10 +70,9 @@ const configureUser = new remote.Command(`${mediaPlayer.fqdn}:configureUser`, {
 
         # Shortcuts to restart gnome, bluetooth, networking, and audio.
         gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings "['/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/', '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom1/', '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom2/', '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom3/', '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom4/']"
-        
-        gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding /org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/ binding '<Control><Alt>r'
-        gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding /org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/ command 'killall -3 gnome-shell'
-        gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding /org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/ name 'Restart Gnome'
+        gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/ binding '<Control><Alt>r'
+        gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/ command 'killall -3 gnome-shell'
+        gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/ name 'Restart Gnome'
         gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom1/ binding '<Primary><Alt>b'
         gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom1/ command 'systemctl restart bluetooth'
         gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom1/ name 'Restart Bluetooth'
@@ -79,20 +83,22 @@ const configureUser = new remote.Command(`${mediaPlayer.fqdn}:configureUser`, {
         gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom3/ command 'systemctl restart NetworkManager'
         gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom3/ name 'Restart NetworkManager'
 
-        
+        gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom4/ binding 'Print'
+        gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom4/ command 'flatpak run org.flameshot.Flameshot gui'
+        gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom4/ name 'Flameshot'
+
         cp ~/.local/share/flatpak/exports/share/applications/org.mozilla.firefox.desktop ~/.config/autostart/
+        #cp /usr/share/applications/com.gexperts.Tilix.desktop ~/.config/autostart/
         
         ${mediaPlayer.sudo} reboot&
         exit
     `
-}, { dependsOn: mediaPlayer.commandsDependsOn });
-mediaPlayer.commandsDependsOn.push(configureUser);
-
-mediaPlayer.waitForConnection();
+});
 
 if (getStack() === 'main') {
-    const passThroughDevices = new remote.Command(`${mediaPlayer.fqdn}:passThroughDevices`, {
+    mediaPlayer.run(`passThroughDevices`, {
         connection: mediaPlayer.providerConnection,
+        waitForReboot: true,
         create: interpolate`
             # NVIDIA
             qm set ${mediaPlayer.cloudID} -hostpci0 01:00
@@ -110,9 +116,23 @@ if (getStack() === 'main') {
             qm shutdown ${mediaPlayer.cloudID}&
             qm wait ${mediaPlayer.cloudID}
             qm start ${mediaPlayer.cloudID}
+        `
+    });
+    mediaPlayer.run('installDrivers', {
+        connection: mediaPlayer.vmConnection,
+        waitForReboot: true,
+        create: interpolate`
+        ${mediaPlayer.sudo} transactional-update run bash -c ' zypper addrepo --refresh https://download.nvidia.com/opensuse/tumbleweed NVIDIA; 
+            zypper --gpg-auto-import-keys ref;
+            zypper -n install --auto-agree-with-licenses \
+                nvidia-glG06 nvidia-video-G06 nvidia-driver-G06-kmp-default kernel-firmware-nvidia-gsp-G06 \
+                kernel-firmware-iwlwifi kernel-firmware-bluetooth
+            exit
+        '
+        ${mediaPlayer.sudo} reboot&
+        exit
     `
-    }, { dependsOn: mediaPlayer.commandsDependsOn });
-    mediaPlayer.commandsDependsOn.push(passThroughDevices);
+    });
 }
 
 export const mediaPlayerIPv4 = mediaPlayer.ipv4;

@@ -13,6 +13,11 @@ const config = new Config();
 export class ProxmoxVM extends VirtualMachine {
     private static ProxmoxProvider: proxmox.Provider | undefined;
 
+    constructor(name: string, args: VirtualMachineArgs, opts: {}) {
+        super(name, args, opts);
+        this.initConnection = { ...this.initConnection, ...{ user: 'root' } };
+    }
+
     createVM(): VirtualMachine {
         let vmSettings = {
             started: false,
@@ -161,7 +166,7 @@ export class ProxmoxVM extends VirtualMachine {
         }, { dependsOn: this.commandsDependsOn });
         this.commandsDependsOn.push(startVM);
 
-        const finalizeVM = new remote.Command(`${this.fqdn}:finalizeVM`, {
+        const cleanupInit = new remote.Command(`${this.fqdn}:cleanupInit`, {
             connection: this.providerConnection,
             create: interpolate`
                 qm set ${this.cloudID} --delete ide1;
@@ -172,21 +177,21 @@ export class ProxmoxVM extends VirtualMachine {
                 qm set ${this.cloudID} --machine q35;
             `
         }, { dependsOn: this.commandsDependsOn });
-        this.commandsDependsOn.push(finalizeVM);
+        this.commandsDependsOn.push(cleanupInit);
 
         return this.commandsDependsOn;
     }
 
-    microosProxmoxSetup(image: MicroOS): any[] {
-        const startVM = new remote.Command(`${this.fqdn}:startVM`, {
+    microosProxmoxSetup(image: MicroOS): void {
+        this.run('startVM', {
             connection: this.providerConnection,
             create: interpolate`
                 echo "$(curl ${image.getSha256URL()} | cut -f 1 -d ' ')  microos.qcow2" \
                 | sha256sum --check || \
                 wget -O ${image.getName()}.qcow2 ${image.getImageURL()} 
-                which expect || apt install -y expect
                 qm importdisk ${this.cloudID} ${image.getName()}.qcow2 local-lvm
-                qm set ${this.cloudID} --scsi0 local-lvm:vm-${this.cloudID}-disk-1
+                qm set ${this.cloudID} --scsi0 local-lvm:vm-${this.cloudID}-disk-0
+                qm resize ${this.cloudID} scsi0 +75G
 
                 # Have to turn the VM on so that the guest - agent can be installed.
                 qm start ${this.cloudID}
@@ -205,25 +210,21 @@ export class ProxmoxVM extends VirtualMachine {
                     sleep 5;
                 done; 
             `
-        }, { dependsOn: this.commandsDependsOn });
-        this.commandsDependsOn.push(startVM);
+        });
 
-        const finalizeVM = new remote.Command(`${this.fqdn}:finalizeVM`, {
+        this.run('cleanupInit', {
             connection: this.providerConnection,
             create: interpolate`
-                qm set ${this.cloudID} --ide2 none;
-                qm set ${this.cloudID} --ide3 none;
-                qm set ${this.cloudID} --agent 1;
+                qm set ${this.cloudID} --delete ide2
+                qm set ${this.cloudID} --delete ide3
+                qm set ${this.cloudID} --agent 1
 
                 # Have to set it this way because it just doesn't work via pulumi.
-                # Or the interface. I think it had something to do with all the IDE drives attached. 
-                # Once I removed those, I think this worked?
+                # Or the interface.I think it had something to do with all the IDE drives attached. 
+                # Once I removed those, I think this worked ?
                 qm set ${this.cloudID} --machine q35;
             `
-        }, { dependsOn: this.commandsDependsOn });
-        this.commandsDependsOn.push(finalizeVM);
-
-        return this.commandsDependsOn;
+        });
     }
 
     debian11ProxmoxSetup(image: Debian11): any[] {
@@ -232,7 +233,7 @@ export class ProxmoxVM extends VirtualMachine {
             create: interpolate`
                 qm stop ${this.cloudID};
                 qm set ${this.cloudID} --ide2 none;
-            `
+        `
         }, { dependsOn: this.commandsDependsOn });
         this.commandsDependsOn.push(proxmoxSetup);
 
@@ -248,7 +249,7 @@ export class ProxmoxVM extends VirtualMachine {
                 until ping -c 1 ${this.hostname}; do 
                     sleep 5;
                 done; 
-            `
+        `
         }, { dependsOn: this.commandsDependsOn });
         this.commandsDependsOn.push(proxmoxSetup);
 
