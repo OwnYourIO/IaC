@@ -21,7 +21,7 @@ const installMediaPlayerDependencies = new remote.Command(`${mediaPlayer.fqdn}:i
         ${mediaPlayer.sudo} transactional-update run bash -c ' zypper addrepo --refresh https://download.nvidia.com/opensuse/tumbleweed NVIDIA; 
             zypper --gpg-auto-import-keys ref;
             zypper -n install --auto-agree-with-licenses \
-                nvidia-glG05 x11-video-nvidiaG05 nvidia-driver-G06-kmp-default \
+                nvidia-glG06 nvidia-video-G06 nvidia-driver-G06-kmp-default kernel-firmware-nvidia-gsp-G06 \
                 kernel-firmware-iwlwifi kernel-firmware-bluetooth \
                 tilix nautilus-extension-tilix
             systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
@@ -44,6 +44,8 @@ const configureUser = new remote.Command(`${mediaPlayer.fqdn}:configureUser`, {
         '
         flatpak install -y flathub org.freedesktop.Platform.ffmpeg-full/x86_64/22.08 \
             com.valvesoftware.Steam \
+            org.freedesktop.Platform.GL.nvidia-525-85-05  \
+            org.freedesktop.Platform.GL32.nvidia-525-85-05  \
             io.github.arunsivaramanneo.GPUViewer \
             org.flameshot.Flameshot \
             org.gnome.Extensions \
@@ -73,9 +75,9 @@ const configureUser = new remote.Command(`${mediaPlayer.fqdn}:configureUser`, {
         gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom2/ binding '<Primary><Alt>a'
         gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom2/ command 'systemctl --user restart pipewire'
         gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom2/ name 'Restart Audio'
-        gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-custom3 binding '<Primary><Alt>n'
-        gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-custom3 command 'systemctl restart NetworkManager'
-        gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-custom3 name 'Restart NetworkManager'
+        gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom3/ binding '<Primary><Alt>n'
+        gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom3/ command 'systemctl restart NetworkManager'
+        gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom3/ name 'Restart NetworkManager'
 
         
         cp ~/.local/share/flatpak/exports/share/applications/org.mozilla.firefox.desktop ~/.config/autostart/
