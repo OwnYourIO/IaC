@@ -110,8 +110,11 @@ export class ProxmoxVM extends VirtualMachine {
             case 'microos-dvd':
                 this.microosDesktopSetup(this.image);
                 break;
-            case 'debain11':
-                this.debian11ProxmoxSetup(this.image);
+            case 'debain-11':
+                this.debianProxmoxSetup();
+                break;
+            case 'debain-12':
+                this.debianProxmoxSetup();
                 break;
             case 'homeassistant':
                 this.homeassistantProxmoxSetup(this.image);
@@ -232,17 +235,14 @@ export class ProxmoxVM extends VirtualMachine {
         });
     }
 
-    debian11ProxmoxSetup(image: Debian11): any[] {
-        const proxmoxSetup = new remote.Command("Remove cloudinit drive", {
+    debianProxmoxSetup(): void {
+        this.run('remove-cloud-init-drive', {
             connection: this.providerConnection,
             create: interpolate`
                 qm stop ${this.cloudID};
                 qm set ${this.cloudID} --ide2 none;
         `
-        }, { dependsOn: this.commandsDependsOn });
-        this.commandsDependsOn.push(proxmoxSetup);
-
-        return this.commandsDependsOn;
+        });
     }
 
     homeassistantProxmoxSetup(image: HomeAssistantOS): any[] {
