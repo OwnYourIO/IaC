@@ -4,6 +4,9 @@ import { BaseVMImage } from './';
 import { VirtualMachine } from "../providers";
 
 export class MicroOS extends BaseVMImage {
+    install = ` transactional-update pkg install  `;
+    updateRepo = ` transaction-update pkg update `;
+
     constructor() {
         super();
         this.name = 'microos';

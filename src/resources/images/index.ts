@@ -39,6 +39,9 @@ export abstract class BaseVMImage {
         return [];
     }
 
+    abstract updateRepo: string;
+    abstract install: string;
+
     abstract finalize(connection: Input<types.input.remote.ConnectionArgs>, vm: VirtualMachine): any[];
 
     abstract installDocker(connection: Input<types.input.remote.ConnectionArgs>, vm: VirtualMachine): any[];

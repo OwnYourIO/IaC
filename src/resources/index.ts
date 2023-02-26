@@ -12,7 +12,7 @@ const providerMap = {
     proxmox: ProxmoxVM,
     // hcloud: HCloudVirtualMachine,
 };
-export type Keys = keyof typeof providerMap; // 'dev' | 'manager'
+export type Keys = keyof typeof providerMap;
 type providerTypes = typeof providerMap[Keys];
 type ExtractInstanceType<T> = T extends new () => infer R ? R : VirtualMachine;
 

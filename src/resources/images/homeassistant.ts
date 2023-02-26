@@ -5,6 +5,9 @@ import { BaseVMImage } from './';
 import { VirtualMachine } from "../providers";
 
 export class HomeAssistantOS extends BaseVMImage {
+    install = ``;
+    updateRepo = ``;
+
     constructor() {
         super();
         this.name = 'homeassistant';

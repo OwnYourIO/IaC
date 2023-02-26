@@ -84,6 +84,13 @@ export abstract class VirtualMachine extends ComponentResource {
         return this.image.sudo(this.adminPassword);
     }
 
+    get updateRepo(): string {
+        return this.image.updateRepo;
+    }
+    get install(): string {
+        return this.image.install;
+    }
+
     abstract createVM(): void;
 
     constructor(
