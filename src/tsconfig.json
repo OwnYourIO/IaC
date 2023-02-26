@@ -1,6 +1,7 @@
 {
     "compilerOptions": {
         "strict": true,
+        "exactOptionalPropertyTypes": true,
         "outDir": "bin",
         "target": "es2022",
         "module": "es2022",

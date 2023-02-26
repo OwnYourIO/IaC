@@ -2,7 +2,7 @@ import { remote, types, local } from "@pulumi/command";
 import { Output, Input, ComponentResource, Config, interpolate, getStack } from '@pulumi/pulumi';
 
 import { BaseVMImage } from "../images";
-import { Keys } from "../";
+import { Keys, DNSFactory } from "../";
 
 //@ts-ignore
 import { readFileSync } from "fs";
@@ -10,6 +10,7 @@ import { readFileSync } from "fs";
 import { join } from "path";
 //@ts-ignore
 import { homedir } from "os";
+import { DNSKeys, DNSRecord } from "../dns";
 
 const config = new Config();
 
@@ -73,8 +74,9 @@ export abstract class VirtualMachine extends ComponentResource {
     abstract get providerConnection(): Input<types.input.remote.ConnectionArgs>;
 
 
-    dnsProvider: string | undefined;
+    dnsProvider?: DNSKeys | undefined;
     additionalSubdomains: string[] | undefined;
+    dnsRecords: DNSRecord[];
 
     commandsDependsOn: any[]
 
@@ -87,7 +89,7 @@ export abstract class VirtualMachine extends ComponentResource {
     constructor(
         name: string,
         args: VirtualMachineArgs,
-        opts: {},
+        opts: { dependsOn?: any[] },
     ) {
         let stackStr;
         if (getStack() !== "main") {
@@ -131,6 +133,7 @@ export abstract class VirtualMachine extends ComponentResource {
         this.ipv4 = interpolate``;
         this.ipv6 = interpolate``;
         this.cloudID = interpolate``;
+        this.dnsRecords = [];
     }
 
     waitForInitConnection(): void {
@@ -195,6 +198,31 @@ export abstract class VirtualMachine extends ComponentResource {
         });
         this.commandsDependsOn.push(waitForStart);
     }
+
+    finalizeVM(args: VirtualMachineArgs): void {
+        if (this.dnsProvider) {
+            DNSFactory.createARecord(`${this.fqdn}`, {
+                domain: this.domain,
+                hostname: this.hostname,
+                dnsProvider: this.dnsProvider,
+                value: interpolate`${this.ipv4}`,
+            }, { dependsOn: this.commandsDependsOn });
+
+            if (this.additionalSubdomains) {
+                this.additionalSubdomains.forEach((record: string) => {
+                    // This check has to be repeated in the loop because the context changes 
+                    // enough from even just outside the loop.
+                    if (this.dnsProvider) {
+                        DNSFactory.createARecord(`${record}.${this.domain}`, {
+                            domain: this.domain,
+                            hostname: record,
+                            dnsProvider: this.dnsProvider,
+                            value: interpolate`${this.ipv4}`,
+                        }, { dependsOn: this.commandsDependsOn });
+                    }
+                }, this);
+            }
+        }
 
     };
 

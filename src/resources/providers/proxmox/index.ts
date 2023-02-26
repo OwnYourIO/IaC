@@ -77,7 +77,7 @@ export class ProxmoxVM extends VirtualMachine {
             ...vmSettings,
         }, {
             provider: ProxmoxVM.getProvider(),
-            dependsOn: preConditions,
+            dependsOn: this.commandsDependsOn,
             // Currently the parameters that are assigned to the resource in pulumi
             // seem like they are the initial values, not what I set... But then cdrom: enabled did so IDK.
             ignoreChanges: [
@@ -120,6 +120,11 @@ export class ProxmoxVM extends VirtualMachine {
             default:
                 break;
         }
+        // Set this after the VMs have been started. 
+        this.ipv4 = proxmox.vm.VirtualMachine.get(`${this.fqdn}-ip-update`,
+            this.cloudID, { nodeName: 'pve-main', },
+            { provider: ProxmoxVM.getProvider(), dependsOn: this.commandsDependsOn })
+            .ipv4Addresses[1][0];
         return this;
     };
 
