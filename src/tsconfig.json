@@ -12,13 +12,11 @@
         "pretty": true,
         "noFallthroughCasesInSwitch": true,
         "noImplicitReturns": true,
-        "forceConsistentCasingInFileNames": true
+        "forceConsistentCasingInFileNames": true,
+        "types": [ "node"]
     },
     "ts-node": {
         "esm": true,
         "experimentalSpecifierResolution": "node"
     },
-    "files": [
-        "index.ts"
-    ]
 }

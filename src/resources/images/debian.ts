@@ -41,6 +41,7 @@ export class Debian extends BaseVMImage {
                 ${vm.sudo} ${this.install} docker-compose apparmor-utils;
                 ${vm.sudo} systemctl enable --now docker;
                 
+                # Seems like this shouldn't be needed, but it is.
                 ${vm.sudo} ${this.install} apparmor --reinstall
                 service apparmor restart
                 service docker restart

@@ -62,8 +62,3 @@ export class DNSFactory {
         return record;
     }
 }
-
-    fqdn: string;
-    ipv4: Output<string>;
-    ipv6: Output<string> | undefined | null;
-}

@@ -1,0 +1,7 @@
+name: media-automation
+description: Set up a TechnoCore server running media automation
+runtime:
+  name: nodejs
+  options:
+    # See https://github.com/TypeStrong/ts-node/issues/1007
+    nodeargs: "--loader ts-node/esm --no-warnings"

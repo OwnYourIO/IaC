@@ -1,5 +1,5 @@
 import { remote, types, local } from "@pulumi/command";
-import { Output, Input, ComponentResource, Config, interpolate, getStack } from '@pulumi/pulumi';
+import { Output, Input, ComponentResource, Config, interpolate, getStack, Resource } from '@pulumi/pulumi';
 
 import { BaseVMImage } from "../images";
 import { Keys, DNSFactory } from "../";
@@ -92,6 +92,7 @@ export abstract class VirtualMachine extends ComponentResource {
     dnsRecords: DNSRecord[];
 
     commandsDependsOn: any[]
+    instance: Resource;
 
     get sudo(): string {
         return this.image.sudo(this.adminPassword);
@@ -155,6 +156,7 @@ export abstract class VirtualMachine extends ComponentResource {
 
         this.sizes = { ...defaultSizes };
         this.size = this.sizes[args.size];
+        this.instance = this;
     }
 
     setSizeOverrides(sizeOverrides: { [key: string]: Partial<Size> }) {

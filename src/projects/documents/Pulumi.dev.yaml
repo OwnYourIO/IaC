@@ -1,0 +1,12 @@
+config:
+  Documents:cloudflare-zoneId-spencerslab.com: d1e88bbc577f77595127d4954d9a98b8
+  Documents:default-admin-password:
+    secure: AAABAKKX2KrAkS3xb0Iz4qpuCzy4vDIgnSbeKDzp6rXbqMry1CMNDWU=
+  Documents:domain: spencerslab.com
+  Documents:lets-encrypt-email: tms@spencerslab.com
+  Documents:proxmox_ve_endpoint: https://pve-main.spencerslab.com:8006
+  Documents:proxmox_ve_password:
+    secure: AAABABKihhTR5hXGxI82FSvN8vWzlNTY+0Q/W0erRrgJLmSzd97iBO8=
+  Documents:proxmox_ve_username: root@pam
+  cloudflare:apiToken:
+    secure: AAABABpwxC5RdJea+sbvIe/yVPZDXSnvwBumYtecQeYyrW6P942YCgCyg/m+lWu9AKFunRTWSpjhVN8kqEpasIIRvWA0cNhT

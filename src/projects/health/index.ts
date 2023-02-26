@@ -7,10 +7,9 @@ import { HomeAssistantOS } from "../../resources/images/homeassistant";
 const config = new Config();
 
 
-const documentsHA = VirtualMachineFactory.createVM(`documentsHA`, {
+const documentsHA = VirtualMachineFactory.createVM(`health-tracking`, {
     cloud: 'proxmox',
     size: 'Medium',
     image: new HomeAssistantOS(),
     dnsProvider: 'cloudflare',
-    additionalSubdomains: ['documents', 'documents-proxy', 'paperless', 'pictures'],
 }, {});
