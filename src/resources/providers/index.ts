@@ -15,26 +15,38 @@ import { DNSKeys, DNSRecord } from "../dns";
 const config = new Config();
 
 export type Size = {
+    commonName: string,
     cores: number,
-    baseMemory: number
+    baseMemory: number,
+    providerTag?: string,
 };
-const sizes = {
+
+const defaultSizes = {
     'Small': {
+        commonName: 'Small',
         cores: 2,
-        baseMemory: 2000
-    }, 'Medium': {
+        baseMemory: 2000,
+        providerTag: ''
+    },
+    'Medium': {
+        commonName: 'Medium',
         cores: 4,
-        baseMemory: 4000
-    }, 'Large': {
+        baseMemory: 4000,
+        providerTag: ''
+    },
+    'Large': {
+        commonName: 'Large',
         cores: 8,
-        baseMemory: 16000
+        baseMemory: 16000,
+        providerTag: ''
     }
 };
+type Sizes = keyof typeof defaultSizes;
 
 export type VirtualMachineArgs = {
     dnsProvider?: 'cloudflare' | 'hetzner';
     cloud: Keys;
-    size: keyof typeof sizes;
+    size: Sizes;
     image: BaseVMImage;
     additionalSubdomains?: string[];
     name?: string;
@@ -57,7 +69,7 @@ export abstract class VirtualMachine extends ComponentResource {
     templateImageURL: string | undefined;
     ipv4: Output<string>;
     ipv6: Output<string>;
-
+    sizes: { [key: string]: Size };
     size: Size;
 
     name: string;
@@ -118,8 +130,6 @@ export abstract class VirtualMachine extends ComponentResource {
 
         this.image = args.image ?? config.get('default-image');
 
-        this.size = sizes[args.size];
-
         this.adminUser = args.adminUser ?? config.get(`default-admin-user`) ?? 'admin';
         this.adminPassword = args.adminPassword ?? config.require(`default-admin-password`);
         this.publicKey = config.get(`${this.name}-publicKey`) ?? readFileSync(join(homedir(), ".ssh", "id_rsa.pub")).toString("utf8");
@@ -141,6 +151,22 @@ export abstract class VirtualMachine extends ComponentResource {
         this.ipv6 = interpolate``;
         this.cloudID = interpolate``;
         this.dnsRecords = [];
+
+        this.sizes = { ...defaultSizes };
+        this.size = this.sizes[args.size];
+    }
+
+    setSizeOverrides(sizeOverrides: { [key: string]: Partial<Size> }) {
+        Object.entries(sizeOverrides).forEach(
+            ([commonName, overrides]) => {
+                this.sizes[commonName] = {
+                    ...this.sizes[commonName],
+                    ...(typeof overrides === 'object' ? overrides : {})
+                } as Size
+            }
+        );
+
+        this.size = this.sizes[this.size.commonName];
     }
 
     waitForInitConnection(): void {

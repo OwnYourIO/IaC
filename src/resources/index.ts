@@ -1,6 +1,7 @@
 import { ComponentResource, Output, Config, concat } from '@pulumi/pulumi';
 
 import { ProxmoxVM } from './providers/proxmox';
+import { HCloudVM } from './providers/hcloud';
 import { VirtualMachine, VirtualMachineArgs } from './providers';
 
 import * as hcloud from "@pulumi/hcloud";
@@ -10,7 +11,7 @@ import { CloudflareDNSRecord } from './dns/cloudflare';
 
 const providerMap = {
     proxmox: ProxmoxVM,
-    // hcloud: HCloudVirtualMachine,
+    hcloud: HCloudVM,
 };
 export type Keys = keyof typeof providerMap;
 type providerTypes = typeof providerMap[Keys];
