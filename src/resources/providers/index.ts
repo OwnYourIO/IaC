@@ -224,11 +224,12 @@ export abstract class VirtualMachine extends ComponentResource {
             }
         }
 
+        if (args.installDocker) {
+            this.installDocker();
+        }
     };
 
     installDocker(): void {
-        this.commandsDependsOn.push(
-            this.image.installDocker(this.vmConnection, this)
-        );
+        this.image.installDocker(this.vmConnection, this)
     };
 }

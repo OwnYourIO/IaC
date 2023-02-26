@@ -34,7 +34,10 @@ export class VirtualMachineFactory {
             // And makes sure the VM is accessible via IP or fqdn.
             vm.initVM();
 
-            vm.finalizeVM();
+            // For image specific configuration
+            // Or vm options like installDocker.
+            // And adding DNS records
+            vm.finalizeVM(args);
 
             return vm;
         }
