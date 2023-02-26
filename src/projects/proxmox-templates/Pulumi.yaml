@@ -1,7 +1,0 @@
-name: proxmox-templates
-description: Templates in Proxmox to be reused in other projects
-runtime:
-  name: nodejs
-  options:
-    # See https://github.com/TypeStrong/ts-node/issues/1007
-    nodeargs: "--loader ts-node/esm --no-warnings"
