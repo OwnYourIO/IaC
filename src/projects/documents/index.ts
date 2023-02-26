@@ -12,5 +12,9 @@ const documentsHA = VirtualMachineFactory.createVM(`documentsHA`, {
     size: 'Medium',
     image: new HomeAssistantOS(),
     dnsProvider: 'cloudflare',
-    additionalSubdomains: ['documents', 'documents-proxy', 'paperless', 'pictures'],
+    additionalSubdomains: ['documents', 'documents-proxy',
+        'paperless',
+        'pictures', 'immich',
+        'wekan',
+    ],
 }, {});

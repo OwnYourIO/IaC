@@ -11,4 +11,15 @@ const mediaHA = VirtualMachineFactory.createVM(`mediaHA`, {
     size: 'Medium',
     image: new HomeAssistantOS(),
     dnsProvider: 'cloudflare',
+    additionalSubdomains: [
+        'watch', 'jellyfin',
+        'shows', 'sonarr',
+        'movies', 'redarr',
+        'music', 'lidarr',
+        'books', 'readarr',
+        'torrent', 'transmission', 'torrent-redirect',
+        'trackers', 'jackett', 'prowlarr',
+        'transcoding', 'tdarr',
+        'media-backups',
+    ],
 }, {});

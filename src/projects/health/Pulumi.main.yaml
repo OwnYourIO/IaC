@@ -1,0 +1,13 @@
+config:
+  cloudflare:apiToken:
+    secure: AAABAG1Clv4AVWRfMFEaSg6ZO0txeRzvpFtlgLzXqiV4JDmM7FCZifAqSbDlIBoqBzod7ai7CpGwh26f2baNN9EdVo7HlqPN
+  health-tracking:cloudflare-zoneId-spencerslab.com: d1e88bbc577f77595127d4954d9a98b8
+  health-tracking:default-admin-password:
+    secure: AAABADHKcrsWFdIWDcMfrvUBo/PapUaZG/NymOSikyq4Yo5d8N2+cn8=
+  health-tracking:default-admin-user: admin
+  health-tracking:domain: spencerslab.com
+  health-tracking:lets-encrypt-email: tms@spencerslab.com
+  health-tracking:proxmox_ve_endpoint: https://pve-main.spencerslab.com:8006
+  health-tracking:proxmox_ve_password:
+    secure: AAABACZt0qS31sAvKGbFraOOkITdHz0mjkoGEmEVBo7Cim2iPxNYdiU=
+  health-tracking:proxmox_ve_username: root@pam

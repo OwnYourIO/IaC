@@ -1,0 +1,13 @@
+config:
+  cloudflare:apiToken:
+    secure: AAABAA55vYRjsTq3MRrca3n0GP7o0N0lYAXaGYXO8faXvTuwxTAb3sDvHPLwkOLoHmqjEnK1GzsviSZ6N/WWY6z6Go72yDr1
+  media-automation:cloudflare-zoneId-spencerslab.com: d1e88bbc577f77595127d4954d9a98b8
+  media-automation:default-admin-password:
+    secure: AAABAMGUofuuHhHXKU3IjGc+JPXU/zx5+xhQtVe/r2NRNBLuRFptwxc=
+  media-automation:default-admin-user: admin
+  media-automation:domain: spencerslab.com
+  media-automation:lets-encrypt-email: tms@spencerslab.com
+  media-automation:proxmox_ve_endpoint: https://pve-main.spencerslab.com:8006
+  media-automation:proxmox_ve_password:
+    secure: AAABAKC9tai80afvdUtAcslxBKV79XzPmsrv2e7daUjNWMGv26oBgz8=
+  media-automation:proxmox_ve_username: root@pam
