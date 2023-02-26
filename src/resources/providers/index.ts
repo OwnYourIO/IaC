@@ -13,6 +13,7 @@ import { homedir } from "os";
 import { DNSKeys, DNSRecord } from "../dns";
 
 const config = new Config();
+type Connection = Input<types.input.remote.ConnectionArgs>;
 
 export type Size = {
     commonName: string,
@@ -79,11 +80,11 @@ export abstract class VirtualMachine extends ComponentResource {
     adminPassword: string;
     publicKey: string;
     privateKey: string | Output<string>;
-    vmConnection: Input<types.input.remote.ConnectionArgs>;
-    initConnection: Input<types.input.remote.ConnectionArgs>;
+    vmConnection: Connection;
+    initConnection: Connection;
     waitForPingCount: number;
 
-    abstract get providerConnection(): Input<types.input.remote.ConnectionArgs>;
+    abstract get providerConnection(): Connection;
 
 
     dnsProvider?: DNSKeys | undefined;
@@ -145,7 +146,7 @@ export abstract class VirtualMachine extends ComponentResource {
         this.initConnection = this.vmConnection;
         this.waitForPingCount = 0;
 
-        this.commandsDependsOn = [];
+        this.commandsDependsOn = opts?.dependsOn ?? [];
 
         this.ipv4 = interpolate``;
         this.ipv6 = interpolate``;
@@ -177,7 +178,7 @@ export abstract class VirtualMachine extends ComponentResource {
     initVM(): void {
         const conn = {
             host: this.fqdn,
-            user: this.image.initUser,
+            user: this.image.initUser ?? this.adminUser,
             password: this.adminPassword,
             privateKey: this.privateKey,
         };
@@ -188,7 +189,7 @@ export abstract class VirtualMachine extends ComponentResource {
     }
 
     run(name: string, args: {
-        connection: Connection,
+        connection?: Connection,
         create: Output<string>,
         waitForReboot?: boolean,
         waitForStart?: boolean,
@@ -196,38 +197,47 @@ export abstract class VirtualMachine extends ComponentResource {
         delete?: Output<string>
     }): void {
         if (args.waitForStart) {
-            this.waitForPing(undefined, undefined);
+            this.waitForPing();
         }
-        const cmd = new remote.Command(`${this.fqdn}:${name}`, {
+        if (!args.connection) {
+            args.connection = this.vmConnection;
+        }
+
+        let cmdArgs: remote.CommandArgs = {
             connection: args.connection,
             create: args.create,
-            delete: args.delete,
-        }, {
-            dependsOn: this.commandsDependsOn,
-        });
-
-        if (args.waitForReboot) {
-            this.waitForPing(cmd, `${this.fqdn}:${name}`);
-            return;
+            // This works around needing to use exactOptionalPropertyTypes
+            ...(args.delete ? { delete: args.delete } : {}),
         }
+        const cmd = new remote.Command(`${this.fqdn}:${name}`, cmdArgs, {
+            dependsOn: this.commandsDependsOn,
+            deleteBeforeReplace: true,
+            parent: this.instance,
+        });
 
         if (!args.doNotDependOn) {
             this.commandsDependsOn.push(cmd);
         }
+
+        if (args.waitForReboot) {
+            this.waitForPing({ parent: cmd, name: `${this.fqdn}:${name}` });
+        }
     }
 
-    waitForPing(parent?: remote.Command | undefined, name?: string | undefined): void {
+    waitForPing(args: { parent?: remote.Command, name?: string } = {}): void {
         this.waitForPingCount++;
         const waitForStart = new local.Command(`${this.fqdn}:waitForPing(${this.waitForPingCount})`, {
             create: interpolate`
                 sleep 10; # Make sure the VM has stopped it's network before checking if it's up.
-                until ping -c 1 ${this.fqdn}; do 
+                # Getting the IP via dig works around issues with caching the DNS name.
+                # Perhaps I should just use ip, or failing that then DNS?
+                until ping -c 1 $(dig +short ${this.fqdn} | tail -n1); do 
                     sleep 5;
                 done; 
             `
         }, {
             dependsOn: this.commandsDependsOn,
-            parent: parent,
+            deleteBeforeReplace: true,
         });
         this.commandsDependsOn.push(waitForStart);
     }
