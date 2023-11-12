@@ -157,6 +157,22 @@ export class ProxmoxVM extends VirtualMachine {
         return ProxmoxVM.ProxmoxProvider;
     }
 
+    opnSenseInstaller(): any[] {
+        const image = new OpnSenseInstaller();
+        const startVM = new remote.Command(`${this.fqdn}:startVm`, {
+            connection: this.providerConnection,
+            create: interpolate`
+                wget -O /var/lib/vz/template/iso/${image.getName()}.iso.bz2 ${image.getImageURL()} 
+                bunzip2 /var/lib/vz/template/iso/${image.getName()}.iso.bz2 
+                mv /var/lib/vz/template/iso/${image.getName()}.img /var/lib/vz/template/iso/${image.getName()}.iso
+                
+            `
+        }, { dependsOn: this.commandsDependsOn, parent: this.instance });
+        this.commandsDependsOn.push(startVM);
+
+        return this.commandsDependsOn;
+    }
+
     microosDesktopSetup(image: MicroOSDesktop): any[] {
         const startVM = new remote.Command(`${this.fqdn}:startVm`, {
             connection: this.providerConnection,
@@ -169,7 +185,7 @@ export class ProxmoxVM extends VirtualMachine {
                 qm start ${this.cloudID}
                 until qm status ${this.cloudID} | grep running; do 
                     sleep 1;
-                done; 
+                done;
             `
         }, { dependsOn: this.commandsDependsOn });
         this.commandsDependsOn.push(startVM);
@@ -190,9 +206,11 @@ export class ProxmoxVM extends VirtualMachine {
         return this.commandsDependsOn;
     }
 
-    microosProxmoxSetup(image: MicroOS): void {
+    microosProxmoxSetup(): void {
+        const image = new MicroOS();
         this.run('startVM', {
             connection: this.providerConnection,
+            waitForReboot: true,
             create: interpolate`
                 echo "$(curl ${image.getSha256URL()} | cut -f 1 -d ' ')  microos.qcow2" \
                 | sha256sum --check || \
