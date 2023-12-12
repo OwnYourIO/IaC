@@ -7,14 +7,15 @@ import { HomeAssistantOS } from "../../resources/images/homeassistant";
 const config = new Config();
 
 
-const documentsHA = VirtualMachineFactory.createVM(`documentsHA`, {
+const documentsHA = VirtualMachineFactory.createVM(`documents-ha`, {
     cloud: 'proxmox',
     size: 'Medium',
     image: new HomeAssistantOS(),
     dnsProvider: 'cloudflare',
-    additionalSubdomains: ['documents', 'documents-proxy',
-        'paperless',
+    childSubdomains: ['proxy', 'nginx'],
+    siblingSubdomains: [
+        'documents', 'paperless',
         'pictures', 'immich',
-        'wekan',
+        'kanban', 'wekan',
     ],
 }, {});

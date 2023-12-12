@@ -17,11 +17,11 @@ export class Debian extends BaseVMImage {
     }
 
 
-    finalize(connection: types.input.remote.ConnectionArgs, vm: VirtualMachine): any[] {
+    finalize(vm: VirtualMachine): any[] {
         return vm.commandsDependsOn;
     }
 
-    installQemuGuestAgent(connection: types.input.remote.ConnectionArgs, vm: VirtualMachine): void {
+    installQemuGuestAgent(vm: VirtualMachine): void {
         vm.run('install-qemu-guest-agent', {
             create: interpolate`
                 ${vm.sudo} ${vm.updateRepo}
@@ -46,6 +46,7 @@ export class Debian extends BaseVMImage {
                 service apparmor restart
                 service docker restart
             `
+            // TODO: Add the adminUser to wheel?
         });
 
         return vm.commandsDependsOn;

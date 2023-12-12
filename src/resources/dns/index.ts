@@ -8,13 +8,14 @@ export type DNSArgs = {
     dnsProvider: DNSKeys;
     hostname: string;
     domain: string;
-    additionalSubdomains?: string[];
+    //siblingSubdomains?: string[];
     value: Output<string>;
     ttl?: number;
     tlsEmail?: string;
 }
 
 export class DNSRecord extends ComponentResource {
+    // TODO: This should be typed with generics and/or inheritance.
     record: any;
 
     cloudID: Output<string>;
@@ -26,7 +27,7 @@ export class DNSRecord extends ComponentResource {
     fqdn: string;
     hostname: string;
     domain: string;
-    additionalSubdomains: string[] | undefined;
+    //siblingSubdomains: string[] | undefined;
     value: Output<string>;
     tlsEmail: string;
 
@@ -47,7 +48,7 @@ export class DNSRecord extends ComponentResource {
     createMXRecord(): void {
         throw new Error(`Unimplemented`);
     }
-    createCNAMERecord(): void {
+    createCNameRecord(): void {
         throw new Error(`Unimplemented`);
     }
 
@@ -63,7 +64,7 @@ export class DNSRecord extends ComponentResource {
         this.domain = args.domain;
         this.fqdn = fqdn;
         this.dnsProvider = args.dnsProvider;
-        this.additionalSubdomains = args.additionalSubdomains;
+        //this.siblingSubdomains = args.siblingSubdomains;
         this.value = args.value;
         this.tlsEmail = args.tlsEmail ?? config.require('lets-encrypt-email');
 

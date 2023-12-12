@@ -43,12 +43,12 @@ export class MicroOS extends BaseVMImage {
             connection: vm.initConnection,
             waitForReboot: true,
             create: interpolate`
-                useradd -m ${vm.adminUser}
+                useradd -m ${vm.adminUser} -d /var/home/${vm.adminUser}
                 usermod -aG wheel ${vm.adminUser}
                 ${setPasswordCommand}
-                mkdir /home/${vm.adminUser}/.ssh/
-                echo -e "${vm.publicKey}" >> /home/${vm.adminUser}/.ssh/authorized_keys
-                chown -R ${vm.adminUser}:${vm.adminUser} /home/${vm.adminUser}/.ssh/
+                mkdir /var/home/${vm.adminUser}/.ssh/
+                echo -e "${vm.publicKey}" >> /var/home/${vm.adminUser}/.ssh/authorized_keys
+                chown -R ${vm.adminUser}:${vm.adminUser} /var/home/${vm.adminUser}/.ssh/
                 ${this.sudo(vm.adminPassword)} reboot&
                 exit
             `
@@ -56,8 +56,7 @@ export class MicroOS extends BaseVMImage {
         return [secureVM];
     }
 
-    finalize(connection: types.input.remote.ConnectionArgs, vm: VirtualMachine): any[] {
-
+    finalize(vm: VirtualMachine): any[] {
         return vm.commandsDependsOn;
     }
 

@@ -4,8 +4,6 @@ import { ProxmoxVM } from './providers/proxmox';
 import { HCloudVM } from './providers/hcloud';
 import { VirtualMachine, VirtualMachineArgs } from './providers';
 
-import * as hcloud from "@pulumi/hcloud";
-import * as cloudflare from "@pulumi/cloudflare";
 import { DNSRecord, DNSArgs, } from './dns';
 import { CloudflareDNSRecord } from './dns/cloudflare';
 
@@ -51,6 +49,17 @@ export const DNSProviderMap = {
     'hetzner': CloudflareDNSRecord
 };
 export class DNSFactory {
+    static createCNameRecord(
+        name: string,
+        args: DNSArgs,
+        opts: {},
+    ): DNSRecord {
+        const record = new DNSProviderMap[args.dnsProvider](name, args, opts);
+
+        record.createCNameRecord();
+        return record;
+    }
+
     static createARecord(
         name: string,
         args: DNSArgs,

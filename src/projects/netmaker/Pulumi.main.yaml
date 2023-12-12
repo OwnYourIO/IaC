@@ -9,6 +9,8 @@ config:
     secure: AAABAOv8bqV5lMrN8CzWVCPyKtk9ZXdibpH6r6pwuZSew9cVvw/7x9k=
   netmaker:domain: spencerslab.com
   netmaker:lets-encrypt-email: tms@spencerslab.com
+  netmaker:netmakerMediaIngressToken:
+    secure: AAABAMqVddNJ7gd5UTPXkgZKx6dpeMGabEG3LTIHzzLz+Cwizc97UpXsMeX3ksNHrKKdqgpd+aDsba7rmpjPKW5Ji7fxF/Ne+U6wHjmjSLBTq10R8a90bDFb+U9RA0vHqgSMfIdQ8Ik0bwhezkdPhXjgBDsbFVJkczxv+oH80f5nVG698jNoH1xSmqZhE8Zdp+qDM+Xngn9n+fwy8E1xAhhcgTC5f6VpyVvRUw==
   netmaker:proxmox_ve_endpoint: https://pve-main.spencerslab.com:8006
   netmaker:proxmox_ve_password:
     secure: AAABAOCgawQVjCszqEEOwVozEQ7wAKkDcFlTNTRK5AcSp10atsoi/Yw=

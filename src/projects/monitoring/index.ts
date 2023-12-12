@@ -11,7 +11,8 @@ const monitoringVM = VirtualMachineFactory.createVM(`monitoring`, {
     image: new MicroOS(),
     installDocker: true,
     dnsProvider: 'cloudflare',
-    additionalSubdomains: [
+    //childSubdomains: ['proxy', 'nginx'],
+    siblingSubdomains: [
         'alerts',
         'metrics', 'prometheus',
         'graphs', 'grafana',

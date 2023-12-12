@@ -10,6 +10,8 @@ export abstract class BaseVMImage {
     imageURL: string;
     guestAgent: boolean = false;
     initUser: string | undefined;
+    // TODO: It may make more sense to throw an error if this isn't implemented?
+    // Or at least do | undefined?
     initHostname: string = 'localhost';
 
     sudo(password: string): string {
@@ -42,7 +44,8 @@ export abstract class BaseVMImage {
     abstract updateRepo: string;
     abstract install: string;
 
-    abstract finalize(connection: Input<types.input.remote.ConnectionArgs>, vm: VirtualMachine): any[];
-
+    // Some images won't need to do anything, so that should be the default.
+    installQemuGuestAgent(vm: VirtualMachine): void { }
+    abstract finalize(vm: VirtualMachine): any[];
     abstract installDocker(connection: Input<types.input.remote.ConnectionArgs>, vm: VirtualMachine): any[];
 }

@@ -1,9 +1,13 @@
 config:
+  MediaPlayer:cloudflare-zoneId-spencerslab.com: d1e88bbc577f77595127d4954d9a98b8
   MediaPlayer:default-admin-password:
     secure: AAABAGoKevdXCgHt4Ior8r0R5tASNdY4KaSbpzRwWF79BNiBNWFNnjY=
   MediaPlayer:default-admin-user: admin
   MediaPlayer:domain: spencerslab.com
+  MediaPlayer:lets-encrypt-email: tms@spencerslab.com
   MediaPlayer:proxmox_ve_endpoint: https://pve-main.spencerslab.com:8006
   MediaPlayer:proxmox_ve_password:
     secure: AAABAIq8PNcbYuwg+9GwGtXdZnVm7UXXxOJ2JKsR19puLXP5p4sNHUQ+8CvzSTY=
   MediaPlayer:proxmox_ve_username: pulumi@pam
+  cloudflare:apiToken:
+    secure: AAABANiUfOqtPlTpKIonA9leROFPaP+Fjq4a+yeemdcChR83XeSjrOesiTzW5/q4VzrCZcR0hUzU5lGS48aoV6pfEucygXdC

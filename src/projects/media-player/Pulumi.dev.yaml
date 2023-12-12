@@ -1,0 +1,9 @@
+config:
+  MediaPlayer:default-admin-password:
+    secure: AAABANP18I0j2h7NGT8mJ3VxjA2HHeexLSLVWsZEWUTRjKsJs3D3Lpw=
+  MediaPlayer:default-admin-user: spencer
+  MediaPlayer:domain: spencerslab.com
+  MediaPlayer:proxmox_ve_endpoint: https://pve-main.spencerslab.com:8006
+  MediaPlayer:proxmox_ve_password:
+    secure: AAABAF849hxZ+FvUMtEETzfWkFLhNZcP4t2RqBI2V2ypgZMv43LMGLYUdu+yvKk=
+  MediaPlayer:proxmox_ve_username: pulumi@pam

@@ -18,7 +18,7 @@ export class HomeAssistantOS extends BaseVMImage {
         this.guestAgent = true;
     }
 
-    finalize(connection: types.input.remote.ConnectionArgs, vm: VirtualMachine): any[] {
+    finalize(vm: VirtualMachine): any[] {
         // Nothing to do for HomeAssistant.
         return vm.commandsDependsOn;
     }

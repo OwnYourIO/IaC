@@ -1,5 +1,5 @@
 import { remote, types, local } from "@pulumi/command";
-import { Output, Input, ComponentResource, Config, interpolate, getStack, Resource } from '@pulumi/pulumi';
+import { Output, Input, ComponentResource, Config, interpolate, getStack, Resource, log } from '@pulumi/pulumi';
 
 import { BaseVMImage } from "../images";
 import { Keys, DNSFactory } from "../";
@@ -32,7 +32,7 @@ const defaultSizes = {
     'Medium': {
         commonName: 'Medium',
         cores: 4,
-        baseMemory: 4000,
+        baseMemory: 8000,
         providerTag: ''
     },
     'Large': {
@@ -42,6 +42,10 @@ const defaultSizes = {
         providerTag: ''
     }
 };
+// It's a little subtle how defaultSizes gets translated into a type. 
+// For more info checkout:
+// https://steveholgado.com/typescript-types-from-arrays/#arrays-of-objects
+//type Sizes = typeof defaultSizes[string]['commonName'];
 type Sizes = keyof typeof defaultSizes;
 
 export type VirtualMachineArgs = {
@@ -49,14 +53,17 @@ export type VirtualMachineArgs = {
     cloud: Keys;
     size: Sizes;
     image: BaseVMImage;
-    additionalSubdomains?: string[];
+    siblingSubdomains?: string[];
+    childSubdomains?: string[];
     name?: string;
     hostname?: string;
     domain?: string;
+    vLanId?: number;
     installDocker?: boolean;
     tlsEmail?: string;
     adminUser?: string;
     adminPassword?: string;
+    commandsDependsOn?: any[];
 }
 
 export abstract class VirtualMachine extends ComponentResource {
@@ -88,8 +95,10 @@ export abstract class VirtualMachine extends ComponentResource {
 
 
     dnsProvider?: DNSKeys | undefined;
-    additionalSubdomains: string[] | undefined;
+    siblingSubdomains: string[] | undefined;
+    childSubdomains: string[] | undefined;
     dnsRecords: DNSRecord[];
+    vLanID?: number | undefined;
 
     commandsDependsOn: any[]
     instance: Resource;
@@ -117,6 +126,7 @@ export abstract class VirtualMachine extends ComponentResource {
             stackStr = `-${getStack()}`;
         }
         const vmName = `${name}${stackStr ?? ''}`;
+        // TODO: Validate that name can be a hostname?
         const hostname = args.hostname ?? vmName;
         const domain = args.domain ?? config.get('domain') ?? 'local';
         const fqdn = `${hostname}.${domain}`;
@@ -126,14 +136,18 @@ export abstract class VirtualMachine extends ComponentResource {
         this.domain = domain;
         this.hostname = hostname;
         this.fqdn = fqdn;
+        this.vLanID = args.vLanId;
 
         this.dnsProvider = args.dnsProvider;
-        this.additionalSubdomains = args.additionalSubdomains;
+        this.siblingSubdomains = args.siblingSubdomains;
+        this.childSubdomains = args.childSubdomains;
 
-        this.image = args.image ?? config.get('default-image');
+        this.image = args.image;
 
         this.adminUser = args.adminUser ?? config.get(`default-admin-user`) ?? 'admin';
+        // TODO: This should be generated and saved if not set initially.
         this.adminPassword = args.adminPassword ?? config.require(`default-admin-password`);
+        // TODO: This should be generated and saved if not set initially. Either in the user's file system or pulumi config.
         this.publicKey = config.get(`${this.name}-publicKey`) ?? readFileSync(join(homedir(), ".ssh", "id_rsa.pub")).toString("utf8");
         this.privateKey = config.getSecret(`${this.name}-privateKey`) ?? readFileSync(join(homedir(), ".ssh", "id_rsa")).toString("utf8");
 
@@ -197,9 +211,9 @@ export abstract class VirtualMachine extends ComponentResource {
         waitForStart?: boolean,
         doNotDependOn?: boolean,
         delete?: Output<string>
-    }): void {
+    }): Resource {
         if (args.waitForStart) {
-            this.waitForPing();
+            this.waitForPing({ parent: this.instance });
         }
         if (!args.connection) {
             args.connection = this.vmConnection;
@@ -213,7 +227,6 @@ export abstract class VirtualMachine extends ComponentResource {
         }
         const cmd = new remote.Command(`${this.fqdn}:${name}`, cmdArgs, {
             dependsOn: this.commandsDependsOn,
-            deleteBeforeReplace: true,
             parent: this.instance,
         });
 
@@ -223,10 +236,41 @@ export abstract class VirtualMachine extends ComponentResource {
 
         if (args.waitForReboot) {
             this.waitForPing({ parent: cmd, name: `${this.fqdn}:${name}` });
+            return this.commandsDependsOn.slice(-1)[0];
         }
+        return cmd;
     }
 
-    waitForPing(args: { parent?: remote.Command, name?: string } = {}): void {
+    copy(name: string, args: {
+        connection?: Connection,
+        //localPath: Output<string>,
+        //remotePath: Output<string>
+        localPath: string,
+        remotePath: string,
+        doNotDependOn?: boolean,
+    }): Resource {
+        if (!args.connection) {
+            args.connection = this.vmConnection;
+        }
+
+        let cmdArgs: remote.CopyFileArgs = {
+            connection: args.connection,
+            localPath: args.localPath,
+            remotePath: args.remotePath
+        }
+        const cmd = new remote.CopyFile(`${this.fqdn}:${name}`, cmdArgs, {
+            dependsOn: this.commandsDependsOn,
+            parent: this.instance,
+        });
+
+        if (!args.doNotDependOn) {
+            this.commandsDependsOn.push(cmd);
+        }
+
+        return cmd;
+    }
+
+    waitForPing(args: { parent: Resource, name?: string }): void {
         this.waitForPingCount++;
         const waitForStart = new local.Command(`${this.fqdn}:waitForPing(${this.waitForPingCount})`, {
             create: interpolate`
@@ -239,12 +283,15 @@ export abstract class VirtualMachine extends ComponentResource {
             `
         }, {
             dependsOn: this.commandsDependsOn,
-            deleteBeforeReplace: true,
+            parent: args.parent ?? this.commandsDependsOn.slice(-1)[0]
         });
         this.commandsDependsOn.push(waitForStart);
     }
 
     finalizeVM(args: VirtualMachineArgs): void {
+        this.image.installQemuGuestAgent(this);
+        this.image.finalize(this);
+
         if (this.dnsProvider) {
             DNSFactory.createARecord(`${this.fqdn}`, {
                 domain: this.domain,
@@ -253,16 +300,30 @@ export abstract class VirtualMachine extends ComponentResource {
                 value: interpolate`${this.ipv4}`,
             }, { dependsOn: this.commandsDependsOn });
 
-            if (this.additionalSubdomains) {
-                this.additionalSubdomains.forEach((record: string) => {
+            if (this.siblingSubdomains) {
+                this.siblingSubdomains.forEach((record: string) => {
                     // This check has to be repeated in the loop because the context changes 
                     // enough from even just outside the loop.
                     if (this.dnsProvider) {
-                        DNSFactory.createARecord(`${record}.${this.domain}`, {
+                        DNSFactory.createCNameRecord(`${record}.${this.domain}`, {
                             domain: this.domain,
                             hostname: record,
                             dnsProvider: this.dnsProvider,
-                            value: interpolate`${this.ipv4}`,
+                            value: interpolate`${this.fqdn}`,
+                        }, { dependsOn: this.commandsDependsOn });
+                    }
+                }, this);
+            }
+            if (this.childSubdomains) {
+                this.childSubdomains.forEach((record: string) => {
+                    // This check has to be repeated in the loop because the context changes 
+                    // enough from even just outside the loop.
+                    if (this.dnsProvider) {
+                        DNSFactory.createCNameRecord(`${record}.${this.domain}`, {
+                            domain: this.domain,
+                            hostname: `${record}.${this.hostname}`,
+                            dnsProvider: this.dnsProvider,
+                            value: interpolate`${this.fqdn}`,
                         }, { dependsOn: this.commandsDependsOn });
                     }
                 }, this);

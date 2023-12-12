@@ -12,10 +12,16 @@ const k3sVM = VirtualMachineFactory.createVM('core', {
     size: 'Medium',
     image: new MicroOS(),
     dnsProvider: 'cloudflare',
+    // TODO: Pass this in from config instead.
     vLanId: 99,
+    //additionalSubdomains: ['build',
+    //    'artifacts', 'artifactory',
+    //    'cicd', 'drone',
+    //    'git', 'forgejo',
+    //],
 }, {
 });
-//
+
 k3sVM.run('install-helm', {
     waitForReboot: true,
     create: interpolate`

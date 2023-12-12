@@ -6,14 +6,12 @@ import { VirtualMachineFactory } from "../../resources";
 const config = new Config();
 const domain = config.require('domain');
 
-const hostname = config.get('media-player-hostname') ?? 'media-player';
 const mediaPlayer = VirtualMachineFactory.createVM('media-player', {
-    domain,
     cloud: 'proxmox',
     size: 'Large',
     image: new MicroOS(),
-}, {
-});
+    dnsProvider: 'cloudflare',
+}, {});
 
 mediaPlayer.run('installDesktop', {
     connection: mediaPlayer.vmConnection,
@@ -26,6 +24,7 @@ mediaPlayer.run('installDesktop', {
                 microos_selinux \
                 games
             zypper -n install \
+                kernel-firmware-sound \
                 tilix nautilus-extension-tilix
             systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
             systemctl set-default graphical.target
@@ -44,6 +43,8 @@ mediaPlayer.run(`configureUserspace`, {
         ${mediaPlayer.sudo} transactional-update run bash -c '
             sed -i "s/DISPLAYMANAGER_AUTOLOGIN=.*\\"/DISPLAYMANAGER_AUTOLOGIN=\\"${mediaPlayer.adminUser}\\"/" /etc/sysconfig/displaymanager
             sed -i "s/DISPLAYMANAGER_PASSWORD_LESS_LOGIN=\\"no\\"/DISPLAYMANAGER_PASSWORD_LESS_LOGIN=\\"yes\\"/" /etc/sysconfig/displaymanager 
+            # TODO: I don't think this is working.
+            sed -i "s/#WaylandEnable=false/WaylandEnable=false/" /etc/gdm/custom.conf 
         '
         flatpak --user remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
         flatpak --user install -y org.mozilla.firefox \
@@ -87,12 +88,18 @@ mediaPlayer.run(`configureUserspace`, {
         gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom4/ command 'flatpak run org.flameshot.Flameshot gui'
         gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom4/ name 'Flameshot'
 
+        mkdir -p ~/.config/autostart/
         cp ~/.local/share/flatpak/exports/share/applications/org.mozilla.firefox.desktop ~/.config/autostart/
         #cp /usr/share/applications/com.gexperts.Tilix.desktop ~/.config/autostart/
         
         ${mediaPlayer.sudo} reboot&
         exit
     `
+    // TODO: Timezone
+    // Some kind of home assistant connection for muting/playing/pausing
+    //      Use ssh into the media player to send play/unmute pause/mute
+    //      But you know the answer is that damn mqtt service.
+    // Install VNC/Some kind of desktop sharing, 
 });
 
 if (getStack() === 'main') {
@@ -122,16 +129,16 @@ if (getStack() === 'main') {
         connection: mediaPlayer.vmConnection,
         waitForReboot: true,
         create: interpolate`
-        ${mediaPlayer.sudo} transactional-update run bash -c ' zypper addrepo --refresh https://download.nvidia.com/opensuse/tumbleweed NVIDIA; 
-            zypper --gpg-auto-import-keys ref;
-            zypper -n install --auto-agree-with-licenses \
-                nvidia-glG06 nvidia-video-G06 nvidia-driver-G06-kmp-default kernel-firmware-nvidia-gsp-G06 \
-                kernel-firmware-iwlwifi kernel-firmware-bluetooth
+            ${mediaPlayer.sudo} transactional-update run bash -c ' zypper addrepo --refresh https://download.nvidia.com/opensuse/tumbleweed NVIDIA; 
+                zypper --gpg-auto-import-keys ref;
+                zypper -n install --auto-agree-with-licenses \
+                    nvidia-glG06 nvidia-video-G06 nvidia-driver-G06-kmp-default kernel-firmware-nvidia-gsp-G06 \
+                    kernel-firmware-iwlwifi kernel-firmware-bluetooth
+                exit
+            '
+            ${mediaPlayer.sudo} reboot&
             exit
-        '
-        ${mediaPlayer.sudo} reboot&
-        exit
-    `
+        `
     });
 }
 
@@ -157,9 +164,11 @@ export const mediaPlayerFQDN = mediaPlayer.fqdn;
 //    zypper install -y mullvad.rpm
 //    rm mullvad.rpm
 
+// TODO: These feel like a backup that could be restored.
+// Adjust resolution
 // Login to Firefox Account
 // Login to Pithos
 // Login to Mullvad
 // Login to Steam
-// Pair remote control 
+// Pair remote control
 // Set weather location

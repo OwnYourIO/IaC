@@ -12,4 +12,10 @@ const documentsHA = VirtualMachineFactory.createVM(`health-tracking`, {
     size: 'Medium',
     image: new HomeAssistantOS(),
     dnsProvider: 'cloudflare',
+    childSubdomains: ['proxy', 'nginx'],
+    siblingSubdomains: [
+        'health',
+        'activity-monitor',
+        'health-research'
+    ],
 }, {});
