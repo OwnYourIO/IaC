@@ -5,7 +5,7 @@ import { Config, log, concat, interpolate, Input, Output, StackReference, getSta
 
 import { VirtualMachine, VirtualMachineArgs, } from "..";
 import { MicroOS, MicroOSDesktop } from '../../images/microos';
-import { Debian11 } from '../../images/debian11';
+import { Debian11 } from '../../images/debian';
 import { HomeAssistantOS } from '../../images/homeassistant';
 import { OpnSenseInstaller } from "../../images/bsd";
 
@@ -32,6 +32,7 @@ export class ProxmoxVM extends VirtualMachine {
             },
             vga: {
                 enabled: true,
+                // TODO: This should be a provider call getVideoMemory(size)
                 memory: 512,
                 type: 'virtio',
             },
@@ -271,12 +272,10 @@ export class ProxmoxVM extends VirtualMachine {
                 sleep 60;
                 echo "post sleep"
                 qm shutdown ${this.cloudID}
+                qm set ${this.cloudID} --agent 1
 
                 qm wait ${this.cloudID}
                 qm start ${this.cloudID}
-                until ping -c 1 ${this.hostname}; do 
-                    sleep 5;
-                done; 
             `
         });
 
@@ -285,7 +284,6 @@ export class ProxmoxVM extends VirtualMachine {
             create: interpolate`
                 qm set ${this.cloudID} --delete ide2
                 qm set ${this.cloudID} --delete ide3
-                qm set ${this.cloudID} --agent 1
 
                 # Have to set it this way because it just doesn't work via pulumi.
                 # Or the interface.I think it had something to do with all the IDE drives attached. 

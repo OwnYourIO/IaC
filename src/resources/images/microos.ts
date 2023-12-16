@@ -4,7 +4,7 @@ import { BaseVMImage } from './';
 import { VirtualMachine } from "../providers";
 
 export class MicroOS extends BaseVMImage {
-    install = ` transactional-update pkg install  `;
+    install = ` transactional-update pkg install -y `;
     updateRepo = ` transaction-update pkg update `;
 
     constructor() {
@@ -12,10 +12,6 @@ export class MicroOS extends BaseVMImage {
         this.name = 'microos';
         this.imageURL = 'https://download.opensuse.org/tumbleweed/appliances/openSUSE-MicroOS.x86_64-OpenStack-Cloud.qcow2';
         this.initUser = 'root';
-    }
-
-    sudo(password: string) {
-        return 'sudo';
     }
 
     initVM(connection: types.input.remote.ConnectionArgs, vm: VirtualMachine): any[] {
@@ -63,6 +59,7 @@ export class MicroOS extends BaseVMImage {
     installDocker(connection: types.input.remote.ConnectionArgs, vm: VirtualMachine): any[] {
         const installDockerAndGuestAgent = new remote.Command(`${vm.fqdn}-install-docker`, {
             connection,
+            // TODO: Add adminUser to docker group.
             create: `${this.sudo(vm.adminPassword)} transactional-update run bash -c 'zypper install -y docker docker-compose; 
                     systemctl enable --now docker
                 '
