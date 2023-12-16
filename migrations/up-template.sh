@@ -1,1 +1,0 @@
-../dogfish/shell-migrations/up-template.sh
