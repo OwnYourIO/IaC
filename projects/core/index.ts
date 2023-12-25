@@ -14,6 +14,7 @@ const k3sVM = VirtualMachineFactory.createVM('core', {
     dnsProvider: 'cloudflare',
     // TODO: Pass this in from config instead.
     vLanId: 99,
+    macAddress: 'D6:8A:F6:C9:4E:A1'
     //additionalSubdomains: ['build',
     //    'artifacts', 'artifactory',
     //    'cicd', 'drone',

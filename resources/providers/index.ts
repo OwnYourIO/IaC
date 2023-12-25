@@ -59,6 +59,7 @@ export type VirtualMachineArgs = {
     hostname?: string;
     domain?: string;
     vLanId?: number;
+    macAddress?: string;
     installDocker?: boolean;
     tlsEmail?: string;
     adminUser?: string;
@@ -99,6 +100,7 @@ export abstract class VirtualMachine extends ComponentResource {
     childSubdomains: string[] | undefined;
     dnsRecords: DNSRecord[];
     vLanID?: number | undefined;
+    macAddress?: string | undefined;
 
     commandsDependsOn: any[]
     instance: Resource;
@@ -137,6 +139,7 @@ export abstract class VirtualMachine extends ComponentResource {
         this.hostname = hostname;
         this.fqdn = fqdn;
         this.vLanID = args.vLanId;
+        this.macAddress = args.macAddress;
 
         this.dnsProvider = args.dnsProvider;
         this.siblingSubdomains = args.siblingSubdomains;

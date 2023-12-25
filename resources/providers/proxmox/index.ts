@@ -65,7 +65,7 @@ export class ProxmoxVM extends VirtualMachine {
                 {
                     bridge: 'vmbr0',
                     model: 'virtio',
-                    vlanId: this.vLanID ?? null,
+                    macAddress: this.macAddress ?? ''
                 },
             ],
             onBoot: true,
