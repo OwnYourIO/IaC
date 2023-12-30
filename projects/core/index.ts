@@ -64,14 +64,10 @@ k3sVM.run('install-argocd', {
 
 k3sVM.run('configure-argocd', {
     waitForReboot: true,
-    // To get the sealed-secret-key, 
-    // kubectl get secret -n kube-system -l sealedsecrets.bitnami.com/sealed-secrets-key -o yaml | base64 
-    // https://github.com/bitnami-labs/sealed-secrets#how-can-i-do-a-backup-of-my-sealedsecrets
     create: interpolate`
         export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
 
         ${k3sVM.sudo} -E bash -c "
-            echo ${config.get('sealed-secret-key')} | base64 -d - | $(which kubectl) create --namespace default -f -
             echo ${config.get('bitwarden-cli-secret')} | base64 -d - | $(which kubectl) create --namespace default -f -
 
             echo y | $(which kubectl) exec -i svc/base-argocd-server -- argocd login 'localhost:8080'  --username=admin --password=$($(which kubectl) exec svc/base-argocd-server -- argocd admin initial-password | head -n 1) --insecure
