@@ -6,7 +6,7 @@ import { VirtualMachineFactory } from "../../resources";
 const config = new Config();
 
 const routerVM = VirtualMachineFactory.createVM(`router`, {
-    cloud: 'proxmox',
+    cloud: config.get('vmCloud') ?? 'proxmox',
     size: 'Medium',
     image: new OpnSenseInstaller(),
     //dnsProvider: 'cloudflare',

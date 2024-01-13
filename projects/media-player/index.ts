@@ -7,7 +7,7 @@ const config = new Config();
 const domain = config.require('domain');
 
 const mediaPlayer = VirtualMachineFactory.createVM('media-player', {
-    cloud: 'proxmox',
+    cloud: config.get('vmCloud') ?? 'proxmox',
     size: 'Large',
     image: new MicroOS(),
     dnsProvider: 'cloudflare',

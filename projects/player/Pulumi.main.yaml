@@ -1,14 +1,17 @@
 config:
   cloudflare:apiToken:
-    secure: AAABAMSCIxFJJMouq/dyg1DE2WhOUo0Jjd2MPXV9MkmXdeEdticK7NaFnSsGDAmnWOdm0o7sYyI0eD5HEygzCKrUxTep8MiP
-  core:bitwarden-cli-secret:
-    secure: AAABAFly29W4A9PwJOj5zwOyr/aRc2QQ/EwVOXed/VesixBHwRe1pR5JupSgnVkh+sTlvq6BKEfWXM22WGNDDWdn9Di/VGNXE+apW+h9gbtSWJLOtmUONml4/5mKKVvS+ROiXaQnmqMmz3xZEAPYmbXDofSAjTOLCUIwxGs+i661RaD9oZAQumwqGmRcjdI4vk8rwwIkVJXhdRg/bFWdGHSKmUmrGvVdFQMm0VN1jXt88oHRNEbd62FCYg/Fk523QqLemUkxtsTDo5fgGY81ZlLKb9zasa/ehYKbxXlzUROkjzc6DoLQWT5+auZ8O0W1HtAU3XKi+dAp4HcROXFH+2lYuTMB98tnI/k5lG1qhXnks2mchggSOybV1R1QFQKmd1nXh06N7r3C0DH2i3ayzfiOAy5dkDNWuMsO9KtPXctwB+yEHbDetGZl381MDcbP8YyAaQmoaoKq3LXtUGt1ZVkwGx6OPSVjJRk0uzBtMnhcrIsbKpLKjlV5tIHwKwAWYwIXuQ==
-  core:cloudflare-zoneId-spencerslab.com: d1e88bbc577f77595127d4954d9a98b8
-  core:default-admin-password:
-    secure: AAABAG5If9G/7YAd2hz+h0oY8CvmAV6WUOU0ctfXA3dtEq+qeVZt824qcK7ShYOMwruDA2I=
-  core:domain: spencerslab.com
-  core:lets-encrypt-email: tms@spencerslab.com
-  core:proxmox_ve_endpoint: https://pve-main.spencerslab.com:8006
-  core:proxmox_ve_password:
-    secure: AAABAPa0ZTFTWS/YV9m2+xcSE2uUerPqSKwuB5Gsod6ycYHMigjAbMA=
-  core:proxmox_ve_username: root@pam
+    secure: AAABAPkmfbVIfQBKfx3tKHpg29Ch4sLkC0GTtm8WY+YPMuRzQXiFxMvPC7kFWzOQv81CM638o9Crol8Od35t0tmHXY0f24zf
+  player:additionalSubDomains: '[]'
+  player:cloudflare-zoneId-spencerslab.com: d1e88bbc577f77595127d4954d9a98b8
+  player:domain: spencerslab.com
+  player:helmChartURL: https://ownyourio.github.io/SpencersLab/
+  player:helmStage: main
+  player:helmValuesURL: https://ownyourio.github.io/IaC/
+  player:lets-encrypt-email: tms@spencerslab.com
+  player:proxmox_ve_endpoint: https://pve-main.spencerslab.com:8006
+  player:proxmox_ve_password:
+    secure: AAABAPHOwosg7Jq87kUQKREii4Nh4kXVWFr3F5+ja1rkPSe4gP6nHJQ=
+  player:proxmox_ve_username: root@pam
+  player:vmMAC: 
+  player:vmProvider: proxmox
+  player:vmVLAN: 77

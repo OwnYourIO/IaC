@@ -8,7 +8,7 @@ const config = new Config();
 
 
 const documentsHA = VirtualMachineFactory.createVM(`health-tracking`, {
-    cloud: 'proxmox',
+    cloud: config.get('vmCloud') ?? 'proxmox',
     size: 'Medium',
     image: new HomeAssistantOS(),
     dnsProvider: 'cloudflare',

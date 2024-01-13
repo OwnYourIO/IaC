@@ -1,14 +1,17 @@
 config:
+  #cloud-proxy:additionalSubDomains: '[]'
+  #cloud-proxy:vmMAC: ""
+  #cloud-proxy:vmVLAN: ""
+  cloud-proxy:cloudflare-zoneId-spencerslab.com: d1e88bbc577f77595127d4954d9a98b8
+  cloud-proxy:domain: spencerslab.com
+  cloud-proxy:helmChartURL: https://ownyourio.github.io/SpencersLab/
+  cloud-proxy:helmStage: main
+  cloud-proxy:helmValuesURL: https://ownyourio.github.io/IaC/
+  cloud-proxy:lets-encrypt-email: tms@spencerslab.com
+  cloud-proxy:proxmox_ve_endpoint: https://pve-main.spencerslab.com:8006
+  cloud-proxy:proxmox_ve_password:
+    secure: AAABAGs9ioe1MYL9fWYupbxOpBZvLvDDzVRPdTUGZ8A7L+RVVex3LJQ=
+  cloud-proxy:proxmox_ve_username: root@pam
+  cloud-proxy:vmProvider: hcloud
   cloudflare:apiToken:
-    secure: AAABAMSCIxFJJMouq/dyg1DE2WhOUo0Jjd2MPXV9MkmXdeEdticK7NaFnSsGDAmnWOdm0o7sYyI0eD5HEygzCKrUxTep8MiP
-  core:bitwarden-cli-secret:
-    secure: AAABAFly29W4A9PwJOj5zwOyr/aRc2QQ/EwVOXed/VesixBHwRe1pR5JupSgnVkh+sTlvq6BKEfWXM22WGNDDWdn9Di/VGNXE+apW+h9gbtSWJLOtmUONml4/5mKKVvS+ROiXaQnmqMmz3xZEAPYmbXDofSAjTOLCUIwxGs+i661RaD9oZAQumwqGmRcjdI4vk8rwwIkVJXhdRg/bFWdGHSKmUmrGvVdFQMm0VN1jXt88oHRNEbd62FCYg/Fk523QqLemUkxtsTDo5fgGY81ZlLKb9zasa/ehYKbxXlzUROkjzc6DoLQWT5+auZ8O0W1HtAU3XKi+dAp4HcROXFH+2lYuTMB98tnI/k5lG1qhXnks2mchggSOybV1R1QFQKmd1nXh06N7r3C0DH2i3ayzfiOAy5dkDNWuMsO9KtPXctwB+yEHbDetGZl381MDcbP8YyAaQmoaoKq3LXtUGt1ZVkwGx6OPSVjJRk0uzBtMnhcrIsbKpLKjlV5tIHwKwAWYwIXuQ==
-  core:cloudflare-zoneId-spencerslab.com: d1e88bbc577f77595127d4954d9a98b8
-  core:default-admin-password:
-    secure: AAABAG5If9G/7YAd2hz+h0oY8CvmAV6WUOU0ctfXA3dtEq+qeVZt824qcK7ShYOMwruDA2I=
-  core:domain: spencerslab.com
-  core:lets-encrypt-email: tms@spencerslab.com
-  core:proxmox_ve_endpoint: https://pve-main.spencerslab.com:8006
-  core:proxmox_ve_password:
-    secure: AAABAPa0ZTFTWS/YV9m2+xcSE2uUerPqSKwuB5Gsod6ycYHMigjAbMA=
-  core:proxmox_ve_username: root@pam
+    secure: AAABAF+4FjejFAzj1lPzr5E89Q8rFg1sgE5CCTKJybjOg6KGNUaCUR5Jrk/WXjm35ukOv9ZRzbucKuPH4xa65X0gwau8tdJM

@@ -5,7 +5,7 @@ import { HomeAssistantOS } from "../../resources/images/homeassistant";
 const config = new Config();
 
 const home = VirtualMachineFactory.createVM(`home`, {
-    cloud: 'proxmox',
+    cloud: config.get('vmCloud') ?? 'proxmox',
     size: 'Medium',
     image: new HomeAssistantOS(),
     dnsProvider: 'cloudflare',

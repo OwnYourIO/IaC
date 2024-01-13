@@ -8,13 +8,12 @@ import { MicroOS, } from '../../resources/images/microos';
 const config = new Config();
 
 const k3sVM = VirtualMachineFactory.createVM('core', {
-    cloud: 'proxmox',
+    cloud: config.get('vmCloud') ?? 'proxmox',
     size: 'Medium',
     image: new MicroOS(),
     dnsProvider: 'cloudflare',
-    // TODO: Pass this in from config instead.
-    vLanId: 99,
-    macAddress: 'D6:8A:F6:C9:4E:A1'
+    vLanId: config.getNumber('vmVLAN'),
+    macAddress: config.get('vmMAC'),
     //additionalSubdomains: ['build',
     //    'artifacts', 'artifactory',
     //    'cicd', 'drone',
@@ -44,8 +43,7 @@ k3sVM.run('install-k3s', {
     `
 });
 
-const chartPath = 'https://github.com/OwnYourIO/SpencersLab.git'
-const appSetPath = 'https://raw.githubusercontent.com/OwnYourIO/SpencersLab/main/default-application-set.yaml'
+const chartPath = config.get('helmChartURL');
 k3sVM.run('install-argocd', {
     waitForReboot: true,
     create: interpolate`
@@ -74,8 +72,8 @@ k3sVM.run('configure-argocd', {
             $(which kubectl) exec svc/base-argocd-server -- argocd cluster set in-cluster --name ${k3sVM.hostname}
             
             # TODO: Should probably either test and use label or remove it and use annotation. 
-            $(which kubectl) label secret -l argocd.argoproj.io/secret-type=cluster  stage=dev
-            $(which kubectl) annotate secret -l argocd.argoproj.io/secret-type=cluster 'stage=dev'
+            $(which kubectl) label secret -l argocd.argoproj.io/secret-type=cluster  stage=${config.get('helmStage') ?? 'dev'}
+            $(which kubectl) annotate secret -l argocd.argoproj.io/secret-type=cluster stage='${config.get('helmStage') ?? 'dev'}'
             $(which kubectl) annotate secret -l argocd.argoproj.io/secret-type=cluster 'repo.chart=${chartPath}'
             $(which kubectl) annotate secret -l argocd.argoproj.io/secret-type=cluster repo.chart.path=charts/
             $(which kubectl) annotate secret -l argocd.argoproj.io/secret-type=cluster repo.values=https://github.com/OwnYourIO/IaC.git

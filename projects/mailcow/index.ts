@@ -3,12 +3,22 @@ import {
     interpolate,
 } from "@pulumi/pulumi";
 import { VirtualMachineFactory } from '../../resources';
+import { Debian12 } from '../../resources/images/debian';
 
 const config = new Config();
 
 const k3sVM = VirtualMachineFactory.createVM('mailcow', {
+    cloud: config.get('vmCloud') ?? 'proxmox',
     size: 'Medium',
+    image: new Debian12(),
     dnsProvider: 'cloudflare',
+    //vLanId: config.getNumber('vmVLAN'),
+    //macAddress: config.get('vmMAC'),
+    //additionalSubdomains: ['build',
+    //    'artifacts', 'artifactory',
+    //    'cicd', 'drone',
+    //    'git', 'forgejo',
+    //],
 }, {
 });
 
@@ -28,6 +38,7 @@ k3sVM.run('install-k3s', {
     `
 });
 
+const chartPath = config.get('helmChartURL');
 k3sVM.run('install-argocd', {
     create: interpolate`
         export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
@@ -53,8 +64,8 @@ k3sVM.run('configure-argocd', {
             $(which kubectl) exec svc/base-argocd-server -- argocd cluster set in-cluster --name ${k3sVM.hostname}
             
             # TODO: Should probably either test and use label or remove it and use annotation. 
-            $(which kubectl) label secret -l argocd.argoproj.io/secret-type=cluster  stage=dev
-            $(which kubectl) annotate secret -l argocd.argoproj.io/secret-type=cluster 'stage=dev'
+            $(which kubectl) label secret -l argocd.argoproj.io/secret-type=cluster  stage=${config.get('helmStage') ?? 'dev'}
+            $(which kubectl) annotate secret -l argocd.argoproj.io/secret-type=cluster stage='${config.get('helmStage') ?? 'dev'}'
             $(which kubectl) annotate secret -l argocd.argoproj.io/secret-type=cluster 'repo.chart=${chartPath}'
             $(which kubectl) annotate secret -l argocd.argoproj.io/secret-type=cluster repo.chart.path=charts/
             $(which kubectl) annotate secret -l argocd.argoproj.io/secret-type=cluster repo.values=https://github.com/OwnYourIO/IaC.git
@@ -66,3 +77,5 @@ k3sVM.run('configure-argocd', {
     `
 });
 
+export const mailcowIPv4 = k3sVM.ipv4;
+export const mailcowFQDN = k3sVM.fqdn;

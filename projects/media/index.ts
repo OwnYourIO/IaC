@@ -7,7 +7,7 @@ const config = new Config();
 
 
 const mediaHA = VirtualMachineFactory.createVM(`media-ha`, {
-    cloud: 'proxmox',
+    cloud: config.get('vmCloud') ?? 'proxmox',
     size: 'Medium',
     image: new HomeAssistantOS(),
     dnsProvider: 'cloudflare',

@@ -58,8 +58,8 @@ export type VirtualMachineArgs = {
     name?: string;
     hostname?: string;
     domain?: string;
-    vLanId?: number;
-    macAddress?: string;
+    vLanId?: number | undefined;
+    macAddress?: string | undefined;
     installDocker?: boolean;
     tlsEmail?: string;
     adminUser?: string;
