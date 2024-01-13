@@ -5,6 +5,7 @@ config:
   monitoring:cloudflare-zoneId-spencerslab.com: d1e88bbc577f77595127d4954d9a98b8
   monitoring:domain: spencerslab.com
   monitoring:helmChartURL: https://ownyourio.github.io/SpencersLab/
+  monitoring:helmServiceToDeploy: monitoring
   monitoring:helmStage: main
   monitoring:helmValuesURL: https://ownyourio.github.io/IaC/
   monitoring:lets-encrypt-email: tms@spencerslab.com

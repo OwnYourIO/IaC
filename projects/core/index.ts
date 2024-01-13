@@ -44,6 +44,7 @@ k3sVM.run('install-k3s', {
 });
 
 const chartPath = config.get('helmChartURL');
+
 k3sVM.run('install-argocd', {
     waitForReboot: true,
     create: interpolate`
@@ -80,7 +81,7 @@ k3sVM.run('configure-argocd', {
             $(which kubectl) annotate secret -l argocd.argoproj.io/secret-type=cluster repo.values.path=projects/
             $(which kubectl) patch clusterrole base-argocd-server --type='json' -p='[{\\"op\\": \\"add\\", \\"path\\": \\"/rules/0\\", \\"value\\":{ \\"apiGroups\\": [\\"argoproj.io\\"], \\"resources\\": [\\"applicationsets\\"], \\"verbs\\": [\\"create\\",\\"patch\\"]}}]'
 
-            $(which kubectl) exec svc/base-argocd-server -- argocd appset create '${appSetPath}'
+            ${k3sVM.sudo} -E helm install ${config.require('helmServiceToDeploy')} OwnYourIO/${config.require('helmServiceToDeploy')}
         "
     `
 });

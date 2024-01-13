@@ -5,6 +5,7 @@ config:
   cloud-proxy:cloudflare-zoneId-spencerslab.com: d1e88bbc577f77595127d4954d9a98b8
   cloud-proxy:domain: spencerslab.com
   cloud-proxy:helmChartURL: https://ownyourio.github.io/SpencersLab/
+  cloud-proxy:helmServiceToDeploy: cloud-proxy
   cloud-proxy:helmStage: main
   cloud-proxy:helmValuesURL: https://ownyourio.github.io/IaC/
   cloud-proxy:lets-encrypt-email: tms@spencerslab.com

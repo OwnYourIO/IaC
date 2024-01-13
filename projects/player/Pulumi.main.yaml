@@ -5,6 +5,7 @@ config:
   player:cloudflare-zoneId-spencerslab.com: d1e88bbc577f77595127d4954d9a98b8
   player:domain: spencerslab.com
   player:helmChartURL: https://ownyourio.github.io/SpencersLab/
+  player:helmServiceToDeploy: player
   player:helmStage: main
   player:helmValuesURL: https://ownyourio.github.io/IaC/
   player:lets-encrypt-email: tms@spencerslab.com

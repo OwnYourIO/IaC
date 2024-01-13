@@ -9,6 +9,7 @@ config:
     secure: AAABAG5If9G/7YAd2hz+h0oY8CvmAV6WUOU0ctfXA3dtEq+qeVZt824qcK7ShYOMwruDA2I=
   core:domain: spencerslab.com
   core:helmChartURL: https://ownyourio.github.io/SpencersLab/
+  core:helmServiceToDeploy: core
   core:helmStage: main
   core:helmValuesURL: https://ownyourio.github.io/IaC/
   core:lets-encrypt-email: tms@spencerslab.com

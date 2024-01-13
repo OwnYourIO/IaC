@@ -6,6 +6,7 @@ config:
   storage:cloudflare-zoneId-spencerslab.com: d1e88bbc577f77595127d4954d9a98b8
   storage:domain: spencerslab.com
   storage:helmChartURL: https://ownyourio.github.io/SpencersLab/
+  storage:helmServiceToDeploy: storage
   storage:helmStage: main
   storage:helmValuesURL: https://ownyourio.github.io/IaC/
   storage:lets-encrypt-email: tms@spencerslab.com
