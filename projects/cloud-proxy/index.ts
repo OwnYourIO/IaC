@@ -3,30 +3,20 @@ import {
     interpolate,
 } from "@pulumi/pulumi";
 import { VirtualMachineFactory } from '../../resources';
-import { MicroOS, } from '../../resources/images/microos';
 
 const config = new Config();
 
-const k3sVM = VirtualMachineFactory.createVM('monitoring', {
-    cloud: 'proxmox',
+const k3sVM = VirtualMachineFactory.createVM('cloud-proxy', {
     size: 'Medium',
-    image: new MicroOS(),
     dnsProvider: 'cloudflare',
 }, {
 });
 
 k3sVM.run('install-helm', {
-    waitForReboot: true,
     create: interpolate`
-        # policycoreutils-python-utils is to support: 
-        # semanage port -a -p tcp -t ssh_port_t 8096
-        ${k3sVM.sudo} ${k3sVM.install} helm policycoreutils-python-utils k9s git
-        ${k3sVM.sudo} reboot&
-        exit
     `
 });
 k3sVM.run('install-k3s', {
-    waitForReboot: true,
     create: interpolate`
         ${k3sVM.sudo} bash -c "
             curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC='server --cluster-init --write-kubeconfig-mode=644' sh -
@@ -37,7 +27,6 @@ k3sVM.run('install-k3s', {
 });
 
 k3sVM.run('install-argocd', {
-    waitForReboot: true,
     create: interpolate`
         export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
         ${k3sVM.sudo} -E helm repo add OwnYourIO "https://ownyourio.github.io/SpencersLab/"
@@ -52,7 +41,6 @@ k3sVM.run('install-argocd', {
 });
 
 k3sVM.run('configure-argocd', {
-    waitForReboot: true,
     create: interpolate`
         export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
 
@@ -76,5 +64,5 @@ k3sVM.run('configure-argocd', {
     `
 });
 
-export const mailcowIPv4 = k3sVM.ipv4;
-export const mailcowFQDN = k3sVM.fqdn;
+export const cloudProxyIPv4 = k3sVM.ipv4;
+export const cloudProxyFQDN = k3sVM.fqdn;

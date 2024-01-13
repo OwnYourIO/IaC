@@ -1,7 +1,0 @@
-{
-    "scripts": {
-        "up": "pulumi up -s dev -y"
-    },
-    "name": "public",
-    "main": "index.ts"
-}

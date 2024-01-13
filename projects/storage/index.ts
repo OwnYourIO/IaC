@@ -7,7 +7,7 @@ import { MicroOS, } from '../../resources/images/microos';
 
 const config = new Config();
 
-const k3sVM = VirtualMachineFactory.createVM('monitoring', {
+const k3sVM = VirtualMachineFactory.createVM('storage', {
     cloud: 'proxmox',
     size: 'Medium',
     image: new MicroOS(),
@@ -76,5 +76,5 @@ k3sVM.run('configure-argocd', {
     `
 });
 
-export const mailcowIPv4 = k3sVM.ipv4;
-export const mailcowFQDN = k3sVM.fqdn;
+export const storageIPv4 = k3sVM.ipv4;
+export const storageFQDN = k3sVM.fqdn;

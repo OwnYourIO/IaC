@@ -1,5 +1,5 @@
-name: monitoring
-description: Set up a k3s VM running the services needed for monitoring a home lab.
+name: cloud-proxy
+description: Set up a k3s VM running the services needed for a proxy running in the cloud.
 runtime:
   name: nodejs
   options:

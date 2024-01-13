@@ -1,5 +1,5 @@
-name: netmaker
-description: Set up a Netmaker server in a cloud and a local Netclient
+name: storage
+description: Set up a k3s VM running the services needed for storage in a home lab.
 runtime:
   name: nodejs
   options:
