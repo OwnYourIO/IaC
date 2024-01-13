@@ -28,8 +28,14 @@ export class MicroOS extends BaseVMImage {
                     sed -i "s/^\\(Defaults targetpw\\)/# \\1/" /etc/sudoers
                     sed -i "s/^\\(ALL\\s\\+ALL=(ALL)\\s\\+ALL\\)/# \\1/" /etc/sudoers
                     sed -i "s/# \\(.wheel\\s\\+ALL=(ALL:ALL)\\s\\+NOPASSWD:\\s\\+ALL\\)/\\1/" /etc/sudoers
-                    growpart /dev/sda 4
+                    #sed -i "s/^\\(.*\\/home\\)/# \\1/" /etc/fstab
+                    #umount /home
+                    #rm -r /home
+                    #ln -s /var/home/ /home/
+                    #growpart /dev/sda 4
                 '
+                #rm -rf /var/home/
+                #btrfs subvolume create /var/home
                 reboot&
                 exit
             `

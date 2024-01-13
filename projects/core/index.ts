@@ -73,7 +73,9 @@ k3sVM.run('configure-argocd', {
             echo y | $(which kubectl) exec -i svc/base-argocd-server -- argocd login 'localhost:8080'  --username=admin --password=$($(which kubectl) exec svc/base-argocd-server -- argocd admin initial-password | head -n 1) --insecure
             $(which kubectl) exec svc/base-argocd-server -- argocd cluster set in-cluster --name ${k3sVM.hostname}
             
+            # TODO: Should probably either test and use label or remove it and use annotation. 
             $(which kubectl) label secret -l argocd.argoproj.io/secret-type=cluster  stage=dev
+            $(which kubectl) annotate secret -l argocd.argoproj.io/secret-type=cluster 'stage=dev'
             $(which kubectl) annotate secret -l argocd.argoproj.io/secret-type=cluster 'repo.chart=${chartPath}'
             $(which kubectl) annotate secret -l argocd.argoproj.io/secret-type=cluster repo.chart.path=charts/
             $(which kubectl) annotate secret -l argocd.argoproj.io/secret-type=cluster repo.values=https://github.com/OwnYourIO/IaC.git
