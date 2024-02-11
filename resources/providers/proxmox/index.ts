@@ -65,6 +65,7 @@ export class ProxmoxVM extends VirtualMachine {
                 {
                     bridge: 'vmbr0',
                     model: 'virtio',
+                    vlanId: this.vLanID ?? 3,
                     macAddress: this.macAddress ?? ''
                 },
             ],
@@ -75,9 +76,12 @@ export class ProxmoxVM extends VirtualMachine {
             timeoutShutdownVm: 45,
             timeoutStopVm: 45,
             timeoutReboot: 45,
-            disks: [{
-                interface: 'scsi0',
-            ]
+            disks: [],
+            //disks: [{
+            //    interface: 'scsi0',
+            //    size: 100,
+            //}, //{ interface: 'scsi1', size: 10 }
+            //]
         };
 
         this.commandsDependsOn.push(ProxmoxVM.getProvider());
@@ -114,8 +118,6 @@ export class ProxmoxVM extends VirtualMachine {
         this.commandsDependsOn.push(proxmoxServer);
         this.instance = proxmoxServer;
 
-        this.ipv4 = proxmoxServer.ipv4Addresses[1][0];
-        this.ipv6 = proxmoxServer.ipv6Addresses[1][0];
         this.cloudID = proxmoxServer.id;
         // TODO: This could be refactored into a key/value pair and called like
         // images[this.image.name].setup(this.image);
@@ -160,6 +162,7 @@ export class ProxmoxVM extends VirtualMachine {
 
         let providerConnection = {
             host: proxmoxHostname,
+            user: config.require('proxmox_ve_username').split('@')[0], // Remove the @pam part.
             password: config.require('proxmox_ve_password'),
         };
         return providerConnection;
@@ -260,7 +263,7 @@ export class ProxmoxVM extends VirtualMachine {
                 wget -O ${image.getName()}.qcow2 ${image.getImageURL()} 
                 qm importdisk ${this.cloudID} ${image.getName()}.qcow2 local-lvm
                 qm set ${this.cloudID} --scsi0 local-lvm:vm-${this.cloudID}-disk-0
-                qm resize ${this.cloudID} scsi0 +75G
+                qm resize ${this.cloudID} scsi0 +${this.extraStorageGB ?? 0}G
 
                 # Have to turn the VM on so that the guest-agent can be installed.
                 qm start ${this.cloudID}

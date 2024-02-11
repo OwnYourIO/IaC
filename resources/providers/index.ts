@@ -53,6 +53,7 @@ export type VirtualMachineArgs = {
     cloud: Keys;
     size: Sizes;
     image: BaseVMImage;
+    extraStorageGB?: number | undefined;
     siblingSubdomains?: string[];
     childSubdomains?: string[];
     name?: string;
@@ -63,7 +64,7 @@ export type VirtualMachineArgs = {
     installDocker?: boolean;
     tlsEmail?: string;
     adminUser?: string;
-    adminPassword?: string;
+    adminPassword?: Output<string>;
     commandsDependsOn?: any[];
 }
 
@@ -85,7 +86,7 @@ export abstract class VirtualMachine extends ComponentResource {
     domain: string;
     image: BaseVMImage;
     adminUser: string;
-    adminPassword: string;
+    adminPassword: Output<string>;
     publicKey: string;
     privateKey: string | Output<string>;
     vmConnection: Connection;
@@ -101,11 +102,12 @@ export abstract class VirtualMachine extends ComponentResource {
     dnsRecords: DNSRecord[];
     vLanID?: number | undefined;
     macAddress?: string | undefined;
+    extraStorageGB?: number | undefined;
 
     commandsDependsOn: any[]
     instance: Resource;
 
-    get sudo(): string {
+    get sudo(): Output<string> {
         return this.image.sudo(this.adminPassword);
     }
 
@@ -140,6 +142,7 @@ export abstract class VirtualMachine extends ComponentResource {
         this.fqdn = fqdn;
         this.vLanID = args.vLanId;
         this.macAddress = args.macAddress;
+        this.extraStorageGB = args.extraStorageGB;
 
         this.dnsProvider = args.dnsProvider;
         this.siblingSubdomains = args.siblingSubdomains;
@@ -149,7 +152,7 @@ export abstract class VirtualMachine extends ComponentResource {
 
         this.adminUser = args.adminUser ?? config.get(`default-admin-user`) ?? 'admin';
         // TODO: This should be generated and saved if not set initially.
-        this.adminPassword = args.adminPassword ?? config.require(`default-admin-password`);
+        this.adminPassword = args.adminPassword ?? config.requireSecret<string>(`default-admin-password`);
         // TODO: This should be generated and saved if not set initially. Either in the user's file system or pulumi config.
         this.publicKey = config.get(`${this.name}-publicKey`) ?? readFileSync(join(homedir(), ".ssh", "id_rsa.pub")).toString("utf8");
         this.privateKey = config.getSecret(`${this.name}-privateKey`) ?? readFileSync(join(homedir(), ".ssh", "id_rsa")).toString("utf8");
@@ -213,7 +216,10 @@ export abstract class VirtualMachine extends ComponentResource {
         waitForReboot?: boolean,
         waitForStart?: boolean,
         doNotDependOn?: boolean,
-        delete?: Output<string>
+        delete?: Output<string>,
+        environment?: Input<{
+            [key: string]: Input<string>;
+        }>
     }): Resource {
         if (args.waitForStart) {
             this.waitForPing({ parent: this.instance });
@@ -224,6 +230,7 @@ export abstract class VirtualMachine extends ComponentResource {
 
         let cmdArgs: remote.CommandArgs = {
             connection: args.connection,
+            environment: { ...(args.environment), ...{ SUDO_PASSWORD: this.adminPassword } },
             create: args.create,
             // This works around needing to use exactOptionalPropertyTypes
             ...(args.delete ? { delete: args.delete } : {}),

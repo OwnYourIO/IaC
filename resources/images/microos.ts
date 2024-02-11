@@ -17,7 +17,7 @@ export class MicroOS extends BaseVMImage {
     initVM(connection: types.input.remote.ConnectionArgs, vm: VirtualMachine): any[] {
         // This sets the password if one is provided. 
         const setPasswordCommand = vm.adminPassword ?
-            ` echo -e '${vm.adminPassword}'"\n"'${vm.adminPassword}' | passwd ${vm.adminUser}`
+            interpolate` echo -e '${vm.adminPassword}'"\n"'${vm.adminPassword}' | passwd ${vm.adminUser}`
             : '';
         const secureVM = vm.run('secureVM', {
             connection: vm.initConnection,
@@ -51,6 +51,7 @@ export class MicroOS extends BaseVMImage {
                 mkdir /var/home/${vm.adminUser}/.ssh/
                 echo -e "${vm.publicKey}" >> /var/home/${vm.adminUser}/.ssh/authorized_keys
                 chown -R ${vm.adminUser}:${vm.adminUser} /var/home/${vm.adminUser}/.ssh/
+                echo 'AcceptEnv SUDO_PASSWORD PULUMI_* KUBECONFIG' >> /etc/ssh/sshd_config.d/allowed_envs.conf
                 ${this.sudo(vm.adminPassword)} reboot&
                 exit
             `
@@ -66,7 +67,7 @@ export class MicroOS extends BaseVMImage {
         const installDockerAndGuestAgent = new remote.Command(`${vm.fqdn}-install-docker`, {
             connection,
             // TODO: Add adminUser to docker group.
-            create: `${this.sudo(vm.adminPassword)} transactional-update run bash -c 'zypper install -y docker docker-compose; 
+            create: interpolate`${this.sudo(vm.adminPassword)} transactional-update run bash -c 'zypper install -y docker docker-compose; 
                     systemctl enable --now docker
                 '
                 ${this.sudo(vm.adminPassword)} reboot&

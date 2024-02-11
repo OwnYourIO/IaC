@@ -1,5 +1,5 @@
 import { remote, types } from "@pulumi/command";
-import { Input } from "@pulumi/pulumi";
+import { Input, Output, interpolate } from "@pulumi/pulumi";
 import { VirtualMachine } from "../providers";
 
 export abstract class BaseVMImage {
@@ -14,8 +14,8 @@ export abstract class BaseVMImage {
     // Or at least do | undefined?
     initHostname: string = 'localhost';
 
-    sudo(password: string): string {
-        return ` echo "${password}" | sudo -S `;
+    sudo(password: Output<string> | string): Output<string> {
+        return interpolate` echo '${password}' | sudo -S `;
     }
 
     getName() {
