@@ -37,6 +37,7 @@ k3sVM.run('install-k3s', {
     waitForReboot: true,
     create: interpolate`
         echo 'export KUBECONFIG=/etc/rancher/k3s/k3s.yaml' >> ~/.bashrc
+        source ~/.bashrc
         ${k3sVM.sudo} bash -c "
             curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC='server --cluster-init --write-kubeconfig-mode=644' sh -
             echo 'export KUBECONFIG=/etc/rancher/k3s/k3s.yaml' >> ~/.bashrc
