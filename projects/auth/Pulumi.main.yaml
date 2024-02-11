@@ -1,0 +1,22 @@
+config:
+  auth:additionalSubDomains: '[]'
+  auth:bitwarden-cli-secret:
+    secure: AAABAMKGGMd9LO6OK8yvpcl4ybYoTK0rO/7cIiI/vbHR1G3CTjxRRb6OnpVLs3U9zaPdnEWwusj+gq063Z38d6ZO9cTDkGnal+UvS8n1n4ELLBz7KeQWqpKRPvEjB+KFlFCDrEA1gpNkI7Gp9WqkWNuQqU8rdKwEw8TmleJ+pU42PbDyVWA9KSTKEiRPxwy+78y6ku/nbWznm0Ow5ZVVNEuH72C2RCP4+SEp8MJ1a2Jc06j81cApDFgsbe54b8DmRhHWdAWe/2/RrdOILRqTP/GowF2wkmot/bwA8Wqc/kHDOQYiHx1Qb+iCKT45DJ2pyKwr/uaihMJoL6hBc6hUPzkhADwFjow35T/EE0AMVRCEEskshgn4VAWVygXL67VB/loDFTUp5ouH7uxv0QL6j8e4Kg5WyRXRe26IR0htg8MMUJvUj347vk3kYQ0kOFQ8fOVXCVU2N62+cc+mQjcNO5vWwOkARQ5GD2XcPjCZjzNMiuj6loVtZNBeN3be95IRTGm0Tg==
+  auth:cloudflare-zoneId-spencerslab.com: d1e88bbc577f77595127d4954d9a98b8
+  auth:default-admin-password:
+    secure: AAABAC0gY5NZUa5Q/3lQ13bST7DXDeor8ySDzYxhXdqXNe7/QqbuN8wQ6MagHvvdew4UtA==
+  auth:domain: spencerslab.com
+  auth:helmChartRepo: https://ownyourio.github.io/SpencersLab/
+  auth:helmServiceToDeploy: auth
+  auth:helmStage: prod
+  auth:helmValuesRepo: https://ownyourio.github.io/IaC/
+  auth:lets-encrypt-email: tms@spencerslab.com
+  auth:proxmox_ve_endpoint: https://pve-main.spencerslab.com:8006
+  auth:proxmox_ve_password:
+    secure: AAABAF8x6iEv93ryBTBdlwI2ebjdtMApp5OoVhQvDAsnc/+z9ey5GYc=
+  auth:proxmox_ve_username: root@pam
+  auth:vmMAC: "D6:8A:F6:C9:4E:A2"
+  auth:vmProvider: proxmox
+  auth:vmVLAN: "77"
+  cloudflare:apiToken:
+    secure: AAABADS7kUM1cwKhqpyNIt5SLcPs+d8ci919yqG3OZMCYbFI0oND/OuVYvOYWw6zsvKq8r7CFDcsOyxJbYxie9/IyE++aS1i
