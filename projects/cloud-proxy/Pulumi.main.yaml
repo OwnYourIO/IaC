@@ -1,8 +1,11 @@
 config:
+  cloud-proxy:bitwarden-cli-secret:
+    secure: AAABAFUp5VaPjMKUap3GO8nLBErEb3Uj2WoC3fPXXtvnubcKF2XlnWDtkzA/pIoJc5VA+8p9+oHKRjuNxvEpdYMoR5Dw5pQAxcGzOWYQ1W2BkSG0cx68d35YfefiQi6B8xz4tIWqYl9C2BIvghLf3PMMZvVm9WwTnVpa5UJlACPMGUb7nsY+eYtC9RcM+GQacDSWVOP/4P3G6DT9sRxyrpwcmsOE0we3mahdoWt9yuI47rtcJ+5li0+Glwn9UvOhlYfGfMn0qfdzQxYyW+z+KZ7If7BL7UV6NaK15lqBAw7Zej3KuX8kkYDSEoKd7WTaVyMYWHWbDtGQKQoVjkD4+EvoETOV5iZgxmjWxm3LR0r9zB0GkuquMinFcXnyNSBxRmTLMlE/WUzcmrQOhASuRIIPZ0TS0zzRZ+C+qyd/wHQq0UCDgPiH4UZKi1CDsL9ePxz7rDrrDmLFqlm6J1oUgc2yjghPq0XK4cC7ICGJiOkFasQUbjE+V9uqZI/YUHo6cohoTg==
   #cloud-proxy:additionalSubDomains: '[]'
   #cloud-proxy:vmMAC: ""
-  #cloud-proxy:vmVLAN: ""
   cloud-proxy:cloudflare-zoneId-spencerslab.com: d1e88bbc577f77595127d4954d9a98b8
+  cloud-proxy:default-admin-password:
+    secure: AAABAMg+lcDa6aXrx6a+qeT8XgjQwdYlNJ7b0GO1u/GNT/sFLwu89jlMpQQC9kGviGxq4A==
   cloud-proxy:domain: spencerslab.com
   cloud-proxy:helmChartURL: https://ownyourio.github.io/SpencersLab/
   cloud-proxy:helmServiceToDeploy: cloud-proxy
@@ -14,5 +17,6 @@ config:
     secure: AAABAGs9ioe1MYL9fWYupbxOpBZvLvDDzVRPdTUGZ8A7L+RVVex3LJQ=
   cloud-proxy:proxmox_ve_username: root@pam
   cloud-proxy:vmProvider: hcloud
+  cloud-proxy:vmVLAN: "99"
   cloudflare:apiToken:
     secure: AAABAF+4FjejFAzj1lPzr5E89Q8rFg1sgE5CCTKJybjOg6KGNUaCUR5Jrk/WXjm35ukOv9ZRzbucKuPH4xa65X0gwau8tdJM

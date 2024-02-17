@@ -1,0 +1,24 @@
+config:
+  auth:proxmox_ve_password:
+    secure: AAABAMNkumzEIEsnNPRdgWI9BzZUeLeyR3BpPkLlV8ITNSm6TAu33CE=
+  cloudflare:apiToken:
+    secure: AAABAM+eVCWDYp2Re5duHx0OaOEyWCOr9kCrz+oT/2oe5YaDrfCvYyUX7VDGm6f0Jn40AdC2yfiz84ryxz9Yg+7d1m8NEZ8U
+  email:bitwarden-cli-secret:
+    secure: AAABADP5RZIKwc4ygYz89cXCEdyANrfMZiuKyz8QHG/UbOVfMvlbcPyrIueXv2GxGpLhn9mVfHfHtDsOuj6n9CHvQ74+RsfCHzzIl+DaWUryrlXmFS3fUB1Gu0lD4y8glATfQgNakG58kL2StbJywZMr8JWy7CK7RZkJKRLkv7iIzX11flCcJ2lJYPMtiuQQx4fRSo5ysLnqtg0BNuew67ZG3Pu8C9z/TOSO5X5binK1+eY9o1zCcTG1Wc6CkDpFFdlyCMTbHGGuBy87dwa2P8XlSZPFkl9ZP+FKkitYE7g3ktpkysLZL4FboYHFEoKpzUb/7DRnF/BQQupv1JgqNJ2BOllRzO5/UDSrnUOc+5v0SEGflz+5OC8Ldi9mj8/LvLlRMFffujAcl7CgoC98DY15F+CEEjeI+EQyK2sHdvdZUHhfAxWDxtCnTZht2Ir9Q8/D/1EncgVOpHMamdVP1ZL/ee427lf2qO6HAQvMUxsSE6ugrpcRxWiifQM2VCQbH83T9w==
+  email:default-admin-password:
+    secure: AAABAGmA72Aej9jdmYk/zPijbIeUFlB9RyShOMgYBNoTvajPfdAALKSJXMrSfy6qVjTRnw==
+  email:proxmox_ve_password:
+    secure: AAABAIC0x4asZTtXYXfpS4L4F7VQmmufc2ut3AvOrJ+CZhUqqcYRCdE=
+  #email:vmMAC: ""
+  email:additionalSubDomains: '[]'
+  email:cloudflare-zoneId-spencerslab.com: d1e88bbc577f77595127d4954d9a98b8
+  email:domain: spencerslab.com
+  email:helmChartURL: https://ownyourio.github.io/SpencersLab/
+  email:helmServiceToDeploy: mailcow
+  email:helmStage: main
+  email:helmValuesURL: https://ownyourio.github.io/IaC/
+  email:lets-encrypt-email: tms@spencerslab.com
+  email:proxmox_ve_endpoint: https://pve-main.spencerslab.com:8006
+  email:proxmox_ve_username: root@pam
+  email:vmProvider: hcloud
+  email:vmVLAN: "99"

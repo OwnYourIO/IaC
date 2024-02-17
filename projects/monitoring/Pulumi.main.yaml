@@ -1,18 +1,19 @@
 config:
   cloudflare:apiToken:
-    secure: AAABAITZ1hemSl4IA6WqKIEJvwvyCC48PW8MPw5IwJS+ENS+mODxOK5XoLQRPbYXqTPyoz2Ox6Nf1lJyWWyOXUjaytL9jsf1
-  monitoring:additionalSubDomains: '[]'
+    secure: AAABACVgMuNVuOoczWP2D62FGcLab7oDmeq0ivMSXBaa1jDLForWL3PbPBldFHnfJPe8L06KnAG8LxQ9MWj2x5kJV9qTX95S
+  monitoring:bitwarden-cli-secret:
+    secure: AAABANBkDk62Z0RtTC5DzejfRbthmYJVfFAcnYH07yNW2Nt2PIcnFTmRJEBf60JxzTsqMhGGI31x6TpX5jiS4J1WmYx5ai9UXTLYcW/e5SlTaAZQPqeie35C5IXGjEkXGW/pnkNyqFf4/z/WGNpvXB5Ux3L1W9kWKpJp//DuqolHN2Pvzs36V/V4q3WxwF4QqquoGpLXQQqOXnFRxUbgdJbVULZyxgehLTOO12TWmPZ/csu8WUpEJzNB8kbAuJ55ywXf5Z2gGaLljisuf7fQO7CP0LULO37Nzm6hSmzdl0Wpqb0BwfWMURl97zv8p4Git2lGIDwLLUmMis1WSm1d7b/49Uu1T47N3OO0sWg6Bj8jubVRZxT6lXAPk6K6wtSXxYfU0JixSO47EGov37qTBTgocYI1GhlJOMN3CF8RaUAC9+tP3kImmIcKmTw5YWSIYUrXz+zy9wRZYZNWkABJJ9Pn6YEHbxKgDfuMM2tTCmK9zr267N8s4+4i4i9UUWTEQ3y2sQ==
+  monitoring:default-admin-password:
+    secure: AAABAC6G8A1a169Ju3lQ+zXA4TWZw6iivSVjHu3BMZXEw3ISOq78RqfJEPn2ioQHjOhC9w==
+  monitoring:proxmox_ve_password:
+    secure: AAABAObBnAYzkE7LzYlJ2SQv+GVg7Xqd5diVHtmadAMKRvIts5GU31g=
   monitoring:cloudflare-zoneId-spencerslab.com: d1e88bbc577f77595127d4954d9a98b8
+  monitoring:default-admin-user: admin
   monitoring:domain: spencerslab.com
-  monitoring:helmChartURL: https://ownyourio.github.io/SpencersLab/
-  monitoring:helmServiceToDeploy: monitoring
-  monitoring:helmStage: main
-  monitoring:helmValuesURL: https://ownyourio.github.io/IaC/
+  monitoring:helmServiceToDeploy: personal
+  monitoring:helmStage: prod
+  monitoring:helmValueRepo: https://github.com/OwnYourIO/IaC/
   monitoring:lets-encrypt-email: tms@spencerslab.com
   monitoring:proxmox_ve_endpoint: https://pve-main.spencerslab.com:8006
-  monitoring:proxmox_ve_password:
-    secure: AAABAJ6cYpqnjCozawK2kEepr7zr91R25AbGdqEjTbtEcSNYA+KSgzw=
   monitoring:proxmox_ve_username: root@pam
-  monitoring:vmMAC: ""
-  monitoring:vmProvider: proxmox
-  monitoring:vmVLAN: 99
+  monitoring:vmVLAN: "99"

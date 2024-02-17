@@ -1,4 +1,6 @@
 config:
+  Home:bitwarden-cli-secret:
+    secure: AAABAC04gxQJWlnQCiQ3Ct2hVTqI0o8gsSP70RI7wFuhkgJGFPd6sqLBusF2EcT2k0l83ckzRFko/oS0CPbBVuVWxTISXRLceMMtMrRRX3z2shDi+q72m+ffI11YPWrT1X8WbRcuP+BVLtKRh/n//EDhJfLjPfikeMq84n/0E82yzo7ZULK9s0Kkun2tnWxNcRbDHHudbmKbVhQOFj5uWKAcCphRhafG2fZTqy2pljqVo778rq7ETMwofdBa5br71GvB8LWwS+GDS+VjQNYhPZWeeCnFb0Bhb6r10pW/OCP/wgxEk2wa5qlI9x+yCYT+lnCl2Tedqgu9TCfDPu5Xlew6R6QlE2xp9N6xv5mPyOEJWSMXDIOHEZvZVSibu66YlxhSV4A/J4JB8bTaJhvBSezyA4HQPx6UJTSrZoqUMvZVcG+KYgULJGU3JlLjklpHlWu42vtxxTeqpTa1btMK8MOlHXZRSLjxenzXxboWtVTTk9v1qJHValuZfET07lP7WY8r7w==
   Home:cloudflare-zoneId-spencerslab.com: d1e88bbc577f77595127d4954d9a98b8
   Home:default-admin-password:
     secure: AAABAH0rVLZIf/J6uPaX85aO26Yvgrh+V3sSR0lm8e5oOdDVYhGKXFk=

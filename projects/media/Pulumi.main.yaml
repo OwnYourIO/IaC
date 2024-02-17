@@ -1,13 +1,19 @@
 config:
   cloudflare:apiToken:
-    secure: AAABAA55vYRjsTq3MRrca3n0GP7o0N0lYAXaGYXO8faXvTuwxTAb3sDvHPLwkOLoHmqjEnK1GzsviSZ6N/WWY6z6Go72yDr1
-  media-automation:cloudflare-zoneId-spencerslab.com: d1e88bbc577f77595127d4954d9a98b8
-  media-automation:default-admin-password:
-    secure: AAABAMGUofuuHhHXKU3IjGc+JPXU/zx5+xhQtVe/r2NRNBLuRFptwxc=
-  media-automation:default-admin-user: admin
-  media-automation:domain: spencerslab.com
-  media-automation:lets-encrypt-email: tms@spencerslab.com
-  media-automation:proxmox_ve_endpoint: https://pve-main.spencerslab.com:8006
-  media-automation:proxmox_ve_password:
-    secure: AAABAKC9tai80afvdUtAcslxBKV79XzPmsrv2e7daUjNWMGv26oBgz8=
-  media-automation:proxmox_ve_username: root@pam
+    secure: AAABAKA12mJ3b06krJnd0PjQ+SF0aiebJWQfoFPMCSweO7QBEdbj+pcblh5js2BlTqRSALky7CesdwQXsl5QlSyjP9DCZPLJ
+  media:bitwarden-cli-secret:
+    secure: AAABAELsQXkEN/hLbvS9Bb+BctOemBl0kId9+qMjTdNVP1jwbh+n9ef+xJ2sVh2fWDMdeSxJCxny8wnDiTAmNzE0VnaA9z0/ko3f5flL9SWDAg4ok4DpVypTFbIo1PH1Az41Mv4VPA5HyVvp9LJzb7AJHVqA8D2Qtdqyrb/Z0vzbsBHtE0e9e3Bh/wtQ55VLU1RN9Mi7A6BACMlW927uDB+sUKNXHPa4nf4aKhfzlj16d4D2VyUUyQh9SGRJPGkkcKzWATdsSi0KFn40zXDP9MjyYkrv0FdG9wOOohJMjolZtIiDcSdrO6Aq8Y6kNSYk2lBLt7+uLTAoS/6dBgU3kA5zfE0YDNAMCbB9g7h00JjcjnRvsCgSkv8kJKz6QEgN1Khoum5uSA+o3OzaUyi6db5DBhUDyfOdLY10482jrFOdFFmnJDx+JbRI53jJ1obaGrMFHcIvvBWIvX5nfXFcXqeJN4BgFdA9lNE7q+LnT7/37uwNP/9cdpaY1Uq/1LST8EPrQA==
+  media:cloudflare-zoneId-spencerslab.com: d1e88bbc577f77595127d4954d9a98b8
+  media:default-admin-password:
+    secure: AAABAIMSRjXHvTM+vnu9hRLOSBWOEUjC1Tatp+TOPCdi5OP0JTdhwNMq077+iyf0+vk4rQ==
+  media:default-admin-user: admin
+  media:domain: spencerslab.com
+  media:helmServiceToDeploy: media
+  media:helmStage: prod
+  media:helmValueRepo: https://github.com/OwnYourIO/IaC/
+  media:lets-encrypt-email: tms@spencerslab.com
+  media:proxmox_ve_endpoint: https://pve-main.spencerslab.com:8006
+  media:proxmox_ve_password:
+    secure: AAABAKi8Hh4s5ZEilOENnMi3NFs7RrlUno8WIaZrOYqHHhbXo/iIc0Y=
+  media:proxmox_ve_username: root@pam
+  media:vmVLAN: "77"

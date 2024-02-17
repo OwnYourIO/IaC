@@ -1,0 +1,22 @@
+config:
+  #infra:vmMAC: ""
+  cloudflare:apiToken:
+    secure: AAABAB/PtdYetm/leJSkIyU1zGYdov+wm2Sc6+6OpzO/TqCTVqxcbuhLtF02UqpI4YA0m1KiRCnEOnZMfDVvSg9ybp+WL9Bh
+  infra:bitwarden-cli-secret:
+    secure: AAABALX5IF/aLx8pHuHJ4Xqc5SbT/BamESctxHVWFPT/vdtFgvsa7BJxD2uQkd1x2k3j3GIRQSht9nMMVvLPJ0vchhUl/CZVkQ7gCcja5HUQt16/oSWWAkzEfDKy3rnyb9PRWk1YdttZpknduDy/ovNBXCYXsVE4KRc9tlBU6sTSgFx2OJB+Llh6rQ+rpJYj9i21mGxh8BzvEwT2z/zyRkuUA0tCVznGqlYSs8/sWqQtsSiyPRftGXmCHKVe1IoGP1zW8Izf8bIdSA6A/tYwZrkDUaQm4358OSgyT9tcVoyG4rPQvnSxaDVouLagmocA2nPOzv2v/bFGc946pPLbtP6CYioSeWuGbbH3WSk52EaBXb223V9AOSwnoxAzpsnwk0qmKGgnCv4dGV3+0RLCyd3XNLG57XQ0mhf/gh1GWFs5/E5Y1ezAOHkslbTi8X4PJ/Ciz0px5jxZXOtQnNCH8m3lJlgwBNSUzcHjvA5ZsjEzat/4itY6Btwy3K39n/2jp3NNfw==
+  infra:default-admin-password:
+    secure: AAABAFrj9ecu3S8QlWQOsxQEhfUTk04+T9TK1CLy1MqkNaok/9REbVxDiqdnHOm4MxKeew==
+  infra:proxmox_ve_password:
+    secure: AAABAJ3fm5E5kvxIqUnwx6DaZc29Ee82hH61oDRBwl9DplXrtQFaudA=
+  infra:additionalSubDomains: '[]'
+  infra:cloudflare-zoneId-spencerslab.com: d1e88bbc577f77595127d4954d9a98b8
+  infra:domain: spencerslab.com
+  infra:helmChartURL: https://ownyourio.github.io/SpencersLab/
+  infra:helmServiceToDeploy: storage
+  infra:helmStage: main
+  infra:helmValuesURL: https://ownyourio.github.io/IaC/
+  infra:lets-encrypt-email: tms@spencerslab.com
+  infra:proxmox_ve_endpoint: https://pve-main.spencerslab.com:8006
+  infra:proxmox_ve_username: root@pam
+  infra:vmProvider: proxmox
+  infra:vmVLAN: "99"
