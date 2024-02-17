@@ -7,14 +7,16 @@ import { MicroOS, } from '../../resources/images/microos';
 
 const config = new Config();
 
-const k3sVM = VirtualMachineFactory.createVM('auth', {
+const k3sVM = VirtualMachineFactory.createVM('backups', {
     cloud: config.get('vmCloud') ?? 'proxmox',
     size: 'Medium',
     image: new MicroOS(),
     dnsProvider: 'cloudflare',
     vLanId: config.getNumber('vmVLAN'),
     macAddress: config.get('vmMAC'),
-    //additionalSubdomains: ['authentik',
+    //additionalSubdomains: ['build',
+    //    'artifacts', 'artifactory',
+    //    'cicd', 'drone',
     //    'git', 'forgejo',
     //],
 }, {

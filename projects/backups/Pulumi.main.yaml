@@ -1,0 +1,27 @@
+config:
+  #storage:vmMAC: ""
+  cloudflare:apiToken:
+    secure: AAABAFI3Y834dAjVs5qZh0pvKiIcBlOfHLZ49OfwSN6xZfb+KKyg/5kPYl96vGkUAGT/beQWo5rj+4NNGYGqazq10evdtNgQ
+  #core:bitwarden-cli-secret:
+  #  secure: AAABAFly29W4A9PwJOj5zwOyr/aRc2QQ/EwVOXed/VesixBHwRe1pR5JupSgnVkh+sTlvq6BKEfWXM22WGNDDWdn9Di/VGNXE+apW+h9gbtSWJLOtmUONml4/5mKKVvS+ROiXaQnmqMmz3xZEAPYmbXDofSAjTOLCUIwxGs+i661RaD9oZAQumwqGmRcjdI4vk8rwwIkVJXhdRg/bFWdGHSKmUmrGvVdFQMm0VN1jXt88oHRNEbd62FCYg/Fk523QqLemUkxtsTDo5fgGY81ZlLKb9zasa/ehYKbxXlzUROkjzc6DoLQWT5+auZ8O0W1HtAU3XKi+dAp4HcROXFH+2lYuTMB98tnI/k5lG1qhXnks2mchggSOybV1R1QFQKmd1nXh06N7r3C0DH2i3ayzfiOAy5dkDNWuMsO9KtPXctwB+yEHbDetGZl381MDcbP8YyAaQmoaoKq3LXtUGt1ZVkwGx6OPSVjJRk0uzBtMnhcrIsbKpLKjlV5tIHwKwAWYwIXuQ==
+  #core:default-admin-password:
+  #  secure: AAABAG5If9G/7YAd2hz+h0oY8CvmAV6WUOU0ctfXA3dtEq+qeVZt824qcK7ShYOMwruDA2I=
+  storage:additionalSubDomains: '[]'
+  storage:bitwarden-cli-secret:
+    secure: AAABACBhw07+FQf+IpkkVG1km6zEGm5BZnarhaIfuW/QY9L0EU9me/XzRAdoRcQPL5e1sTskL/JPxPMjzOlsuSIqBpb33WHj0UjDunwMNDi9QaH6FHpCOe6dF8IgVXXFjEHEaYpxbMzw6eXRH2Hyzo34eLhiSNAyaudaSqsYl63sye1SjGsYz35oHyuPOqqL9r5i1/V9sGPIp414LtzwNPvuJ+iVaM8LiUczVnF85xb+jifPe0YNfo2Apq5QKkpUGAkul8QCFt4NwP1qIL2OnHFFDNGKJcvyG5fA7J/G3mDrno/zH+dWZ1kXvqLo/YaoshvsKIThtBPnyD3T8NT67OOVPt4p6YhfRb5u4OfaKdxgo6JXrEINlpDXgkRaVvrx30pypvtcEK+hOUjLDuyo3XSpKtVRqTSNh+4esOeEK/Hy/4bEizcNT5lt7O7zdEbDtfdjHG0AyWsR4J5JHJKkPyusGav6WDaW2i+nkxcy1GgIdnQXEDwZfgH0l3xz4e8DE8dxqw==
+  storage:cloudflare-zoneId-spencerslab.com: d1e88bbc577f77595127d4954d9a98b8
+  storage:default-admin-password:
+    secure: AAABANWNYptMvw9Qpn3UL2uRk+8rv+x5zGmfQvjh7QQvbf6igx4qFflMMxtbuWMZ79E6UA==
+  storage:domain: spencerslab.com
+  storage:helmChartURL: https://ownyourio.github.io/SpencersLab/
+  storage:helmServiceToDeploy: backups-appset
+  storage:helmStage: main
+  storage:helmValuesURL: https://ownyourio.github.io/IaC/
+  storage:lets-encrypt-email: tms@spencerslab.com
+  storage:proxmox_ve_endpoint: https://pve-main.spencerslab.com:8006
+  storage:proxmox_ve_password:
+    secure: AAABAJLKyiQI4qR8yChfrkq+JmfUDOU2HlAIplOJoSSNlMyFZ9PYMi0=
+  storage:proxmox_ve_username: root@pam
+  storage:vmMAC: "1A:8F:D3:0F:2D:B1"
+  storage:vmProvider: proxmox
+  storage:vmVLAN: "99"

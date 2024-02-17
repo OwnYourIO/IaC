@@ -7,7 +7,7 @@ config:
     secure: AAABAC0gY5NZUa5Q/3lQ13bST7DXDeor8ySDzYxhXdqXNe7/QqbuN8wQ6MagHvvdew4UtA==
   auth:domain: spencerslab.com
   auth:helmChartRepo: https://ownyourio.github.io/SpencersLab/
-  auth:helmServiceToDeploy: auth
+  auth:helmServiceToDeploy: auth-appset
   auth:helmStage: prod
   auth:helmValuesRepo: https://ownyourio.github.io/IaC/
   auth:lets-encrypt-email: tms@spencerslab.com
