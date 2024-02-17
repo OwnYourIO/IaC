@@ -1,5 +1,5 @@
-name: build
-description: Set up a TechnoCore server hosting build services
+name: infra
+description: Set up a k3s VM running the services needed to build, test, and deploy code in a home lab.
 runtime:
   name: nodejs
   options:

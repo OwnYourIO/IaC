@@ -1,4 +1,4 @@
-name: health-tracking
+name: personal
 description: Set up a TechnoCore server running Home Assistant in support of tracking health.
 runtime:
   name: nodejs

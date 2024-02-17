@@ -1,5 +1,5 @@
-name: backups
-description: Set up a k3s VM running the services needed for storage in a home lab.
+name: email
+description: Set up a k3s VM running the email services needed for a home lab.
 runtime:
   name: nodejs
   options:

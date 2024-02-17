@@ -1,4 +1,4 @@
-name: media-automation
+name: media
 description: Set up a TechnoCore server running media automation
 runtime:
   name: nodejs

@@ -1,5 +1,5 @@
-name: mailcow
-description: Set up a k3s VM running the email services (mailcow) needed for a home lab.
+name: grow
+description: Set up a k3s VM running the services needed for a grow system in a home lab.
 runtime:
   name: nodejs
   options:
