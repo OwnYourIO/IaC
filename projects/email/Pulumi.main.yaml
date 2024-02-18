@@ -9,12 +9,12 @@ config:
     secure: AAABAGmA72Aej9jdmYk/zPijbIeUFlB9RyShOMgYBNoTvajPfdAALKSJXMrSfy6qVjTRnw==
   email:proxmox_ve_password:
     secure: AAABAIC0x4asZTtXYXfpS4L4F7VQmmufc2ut3AvOrJ+CZhUqqcYRCdE=
-  #email:vmMAC: ""
+  email:vmMAC: "CA:EB:18:A6:BE:57"
   email:additionalSubDomains: '[]'
   email:cloudflare-zoneId-spencerslab.com: d1e88bbc577f77595127d4954d9a98b8
   email:domain: spencerslab.com
   email:helmChartURL: https://ownyourio.github.io/SpencersLab/
-  email:helmServiceToDeploy: mailcow
+  email:helmServiceToDeploy: email-appset
   email:helmStage: main
   email:helmValuesURL: https://ownyourio.github.io/IaC/
   email:lets-encrypt-email: tms@spencerslab.com

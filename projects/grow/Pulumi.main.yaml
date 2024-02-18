@@ -1,24 +1,22 @@
 config:
-  auth:proxmox_ve_password:
-    secure: AAABANZibaMSFzQtHjbD9aynZ8QFpRIDxDQoof0WTWTDCThrNR0kmI8=
-  #grow:vmMAC: ""
   cloudflare:apiToken:
     secure: AAABACdD/DTCrIsQWeHiBsJO/NuC2wps8Io1BTCpCBR2sLCpcGLB8u/CRDjfBF4peiKfcsZeMHAgmUBZfrjVBhFgeyx5f9EE
+  grow:additionalSubDomains: '[]'
   grow:bitwarden-cli-secret:
     secure: AAABAK2+VjZyqOvQ+IoVW8yfFhv1AH1Vk12rWZapI77Rq2/UgpQI8PtptN5D/8idNqFHZgCaq6/MoYkqT3yoKLiK9SukGUgC5goBXIEFe8SQzdUcr+SQdr3jFUZFfGQeqpdLZGpjMKmdn51WS/ebsLQgLNre6fYyu/jPZiB0bKjRA/x7mhdtjKAaNheWaZkVztsTycl8UrWrW3kYSZUGagzJSpFbHewSyKYav3mDIac/OgFTvoEZOFc3UOaXzlZegD2y/wBQFp9qDxlmeHr2vs7chDxUBM0VA4gr1sOKyzVT9M5HQj9f5wmxJ013w/s7YD5jwf0KpwJPWP4l+fIA+YBp0sE1JNn7QkL4VAJEjUCQ1DOd0ET974pxnqDney/RtRLXeaVK0QmANrj2fNxI7JQ11lFpp4kPILtnFTHEXkr5PZMy/XQWGq+Ezi4ovyW5/L8IeU8YVfVO7X+Hutctj3/ztfKJFhzA0AuyMQV3y3cQiuSK/a+CZtiKTTkbRIRAT/awOA==
-  grow:default-admin-password:
-    secure: AAABAKlOxJV3upWV70KK/ze6IXqXju80zcR+Ng+P9fXGSICQ7GCuWZGVuGBldEpO5CrKtA==
-  grow:proxmox_ve_password:
-    secure: AAABANNBv0ij+0kCEY8VLwXT9VgvZCHTfu4sASsOODcyBUmjj0f73JI=
-  grow:additionalSubDomains: '[]'
   grow:cloudflare-zoneId-spencerslab.com: d1e88bbc577f77595127d4954d9a98b8
+  grow:default-admin-password:
+    secure: AAABAL5XMm8NdQAjEQn7OWfUSiiLIZkAlpkUE/xEWdnrQnTaGleVqnqujn5QOudp9jTvOQ==
   grow:domain: spencerslab.com
   grow:helmChartURL: https://ownyourio.github.io/SpencersLab/
-  grow:helmServiceToDeploy: storage
+  grow:helmServiceToDeploy: grow-appset
   grow:helmStage: main
   grow:helmValuesURL: https://ownyourio.github.io/IaC/
   grow:lets-encrypt-email: tms@spencerslab.com
   grow:proxmox_ve_endpoint: https://pve-main.spencerslab.com:8006
+  grow:proxmox_ve_password:
+    secure: AAABANNBv0ij+0kCEY8VLwXT9VgvZCHTfu4sASsOODcyBUmjj0f73JI=
   grow:proxmox_ve_username: root@pam
+  grow:vmMAC: "A2:06:69:C7:F1:74"
   grow:vmProvider: proxmox
   grow:vmVLAN: "99"

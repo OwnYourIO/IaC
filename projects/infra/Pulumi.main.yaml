@@ -1,5 +1,5 @@
 config:
-  #infra:vmMAC: ""
+  infra:vmMAC: "5E:1F:6B:40:1A:99"
   cloudflare:apiToken:
     secure: AAABAB/PtdYetm/leJSkIyU1zGYdov+wm2Sc6+6OpzO/TqCTVqxcbuhLtF02UqpI4YA0m1KiRCnEOnZMfDVvSg9ybp+WL9Bh
   infra:bitwarden-cli-secret:
@@ -12,7 +12,7 @@ config:
   infra:cloudflare-zoneId-spencerslab.com: d1e88bbc577f77595127d4954d9a98b8
   infra:domain: spencerslab.com
   infra:helmChartURL: https://ownyourio.github.io/SpencersLab/
-  infra:helmServiceToDeploy: storage
+  infra:helmServiceToDeploy: infra-appset
   infra:helmStage: main
   infra:helmValuesURL: https://ownyourio.github.io/IaC/
   infra:lets-encrypt-email: tms@spencerslab.com

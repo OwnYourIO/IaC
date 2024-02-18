@@ -4,13 +4,14 @@ config:
   personal:cloudflare-zoneId-spencerslab.com: d1e88bbc577f77595127d4954d9a98b8
   personal:default-admin-user: admin
   personal:domain: spencerslab.com
-  personal:helmServiceToDeploy: personal
+  personal:helmServiceToDeploy: personal-appset
   personal:helmStage: prod
   personal:helmValueRepo: https://github.com/OwnYourIO/IaC/
   personal:lets-encrypt-email: tms@spencerslab.com
   personal:proxmox_ve_endpoint: https://pve-main.spencerslab.com:8006
   personal:proxmox_ve_username: root@pam
   personal:vmVLAN: "99"
+  personal:vmMAC: "A2:1D:78:BB:FF:75"
   personal:bitwarden-cli-secret:
     secure: AAABADT1/rvW/KdJdjgTxaoOm2z8iJdI6aD81NH0HIHLuUJbaepqpkZqHa4ZY4isYeOV8/5VyIDT6mRnSfRVGQrHb5twjllQ9KXwmq/HvbJ/hD2KNLFNCeXXIZ+wuMhTXu1fJAgGQaFyoe+bOzdJwj0QxWQoLnr77BMPPe147lMyMyNdAaWVwUNH73NuB2dkQytIWoTTzxSdr6bVUO5vq0xzoPxUyn4HSqBkGZ/MAAwOD/1V8dSFvFDIK9ubm1o9cJEsfPQ0uPtMtra5NNBVgu93/hASQ5s8mI9Syhm27iSCDIA4jF9HfzcrGRkdUcXsMsmiVqVHUGQrfgTWRgike+IFZULT/RnaxIQoWuHhi/qpWNROFUBR2naDrG8s/JCTXXbYIY0F/Wg3N7vr8covKJen4NZG5nmvjAcix25tz1LzBDCZXfH9H8CtH9mpueJxmByC9kebtegAE8IB62resce3V7t+8K0Yj3WAFmABRruEz3BW+CJdLIA+mjne2j1+8qke4A==
   personal:default-admin-password:

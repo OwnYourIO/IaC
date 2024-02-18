@@ -10,10 +10,11 @@ config:
   monitoring:cloudflare-zoneId-spencerslab.com: d1e88bbc577f77595127d4954d9a98b8
   monitoring:default-admin-user: admin
   monitoring:domain: spencerslab.com
-  monitoring:helmServiceToDeploy: personal
+  monitoring:helmServiceToDeploy: monitoring-appset
   monitoring:helmStage: prod
   monitoring:helmValueRepo: https://github.com/OwnYourIO/IaC/
   monitoring:lets-encrypt-email: tms@spencerslab.com
   monitoring:proxmox_ve_endpoint: https://pve-main.spencerslab.com:8006
   monitoring:proxmox_ve_username: root@pam
   monitoring:vmVLAN: "99"
+  monitoring:vmMAC: "DE:56:15:AF:4B:90"

@@ -18,6 +18,5 @@ config:
   backups:vmMAC: "1A:8F:D3:0F:2D:B1"
   backups:vmProvider: proxmox
   backups:vmVLAN: "99"
-  #backups:vmMAC: ""
   cloudflare:apiToken:
     secure: AAABAJb41jytTkYrYGMSC/GgfxLNUWSX/fLEx1offd6/kmWvMQjLn4rXATRPgB+vkWteqGCqvmQs6/NCi68euEx5lA4ErQ1u

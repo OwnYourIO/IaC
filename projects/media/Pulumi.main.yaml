@@ -8,7 +8,7 @@ config:
     secure: AAABAIMSRjXHvTM+vnu9hRLOSBWOEUjC1Tatp+TOPCdi5OP0JTdhwNMq077+iyf0+vk4rQ==
   media:default-admin-user: admin
   media:domain: spencerslab.com
-  media:helmServiceToDeploy: media
+  media:helmServiceToDeploy: media-appset
   media:helmStage: prod
   media:helmValueRepo: https://github.com/OwnYourIO/IaC/
   media:lets-encrypt-email: tms@spencerslab.com
