@@ -1,10 +1,10 @@
 config:
   auth:additionalSubDomains: '[]'
   auth:bitwarden-cli-secret:
-    secure: AAABAMKGGMd9LO6OK8yvpcl4ybYoTK0rO/7cIiI/vbHR1G3CTjxRRb6OnpVLs3U9zaPdnEWwusj+gq063Z38d6ZO9cTDkGnal+UvS8n1n4ELLBz7KeQWqpKRPvEjB+KFlFCDrEA1gpNkI7Gp9WqkWNuQqU8rdKwEw8TmleJ+pU42PbDyVWA9KSTKEiRPxwy+78y6ku/nbWznm0Ow5ZVVNEuH72C2RCP4+SEp8MJ1a2Jc06j81cApDFgsbe54b8DmRhHWdAWe/2/RrdOILRqTP/GowF2wkmot/bwA8Wqc/kHDOQYiHx1Qb+iCKT45DJ2pyKwr/uaihMJoL6hBc6hUPzkhADwFjow35T/EE0AMVRCEEskshgn4VAWVygXL67VB/loDFTUp5ouH7uxv0QL6j8e4Kg5WyRXRe26IR0htg8MMUJvUj347vk3kYQ0kOFQ8fOVXCVU2N62+cc+mQjcNO5vWwOkARQ5GD2XcPjCZjzNMiuj6loVtZNBeN3be95IRTGm0Tg==
+    secure: AAABACxg/OYSPDLPgzhrgx87di4J0gX6uE1d8I+tgqr58l8bLz0cF+rOWytc/chw5nYSfuscOacJa2zfNyfPYQzhZn70mSdHB+D/4Y9LcSEt9yB+3NXppOMXFsGosrMJRElqn34KZS/dncs4tyJUn+ZeKyjjofaqOyeYIfuPwh/LZLWmnfkJmcmsVy7SYBB9GfvvTot9zVm96h0EnKXr3/ujScmw4HEPveiu7C8F6g1fYK9T0MNjNt9qQEYdCfs/TgkKTlRyLx9P+o8koO37iODL12WS6Wlo7sSNB1S8wyVSojeE/jXbBc4G/ME0cVUyj50Y37PZpqz/Ux/y8YZokmBKGXqg0NUGUqk0314Nena5rb9MuQ0rpI3iwgN0AHiw7SJwhSK5cvMzJb96XdLlPORli9NBTMJQlIUw7k6Ed/OhOxqbAnuewT3wpHaYiMMYIG0O6IOR0j1qS+SqNSweuVGo+TI9Ormj3ZS2CQ68ErAOI/0WGCDUsCIpH9nnBaR5cuadXA==
   auth:cloudflare-zoneId-spencerslab.com: d1e88bbc577f77595127d4954d9a98b8
   auth:default-admin-password:
-    secure: AAABAC0gY5NZUa5Q/3lQ13bST7DXDeor8ySDzYxhXdqXNe7/QqbuN8wQ6MagHvvdew4UtA==
+    secure: AAABAHVSSc3FU2/jV4naIlPDSYkd0nHHZ1P/Srz2MlPWDYYIqQXYY3Y7PFdTW2yve30BtQ==
   auth:domain: spencerslab.com
   auth:helmChartRepo: https://ownyourio.github.io/SpencersLab/
   auth:helmServiceToDeploy: auth-appset
@@ -13,10 +13,10 @@ config:
   auth:lets-encrypt-email: tms@spencerslab.com
   auth:proxmox_ve_endpoint: https://pve-main.spencerslab.com:8006
   auth:proxmox_ve_password:
-    secure: AAABAF8x6iEv93ryBTBdlwI2ebjdtMApp5OoVhQvDAsnc/+z9ey5GYc=
+    secure: AAABAD0Wwyc/iQM8ZkXqt2vb25+BUCgWBoksgjYEHO1ySpzmFr7yxSw=
   auth:proxmox_ve_username: root@pam
   auth:vmMAC: "D6:8A:F6:C9:4E:A2"
   auth:vmProvider: proxmox
   auth:vmVLAN: "77"
   cloudflare:apiToken:
-    secure: AAABADS7kUM1cwKhqpyNIt5SLcPs+d8ci919yqG3OZMCYbFI0oND/OuVYvOYWw6zsvKq8r7CFDcsOyxJbYxie9/IyE++aS1i
+    secure: AAABAA02YJjG6+13qu+QAPCyEyisbMF6qVEIZN8tTy77HZRyBBwyGH9PFBxLvwBNy7CvAxewEe9KfZRAZgMT19yEiU24EazL

@@ -3,14 +3,16 @@ import {
     interpolate,
 } from "@pulumi/pulumi";
 import { VirtualMachineFactory } from '../../resources';
-import { MicroOS, } from '../../resources/images/microos';
+import { Debian12 } from '../../resources/images/debian';
+import { MicroOS } from '../../resources/images/microos';
 
 const config = new Config();
 
-const k3sVM = VirtualMachineFactory.createVM('backups', {
+const k3sVM = VirtualMachineFactory.createVM('email', {
     cloud: config.get('vmCloud') ?? 'proxmox',
     size: 'Medium',
     image: new MicroOS(),
+    //image: config.get('vmCloud') === 'proxmox' ? new MicroOS() : new Debian12(),
     dnsProvider: 'cloudflare',
     vLanId: config.getNumber('vmVLAN'),
     macAddress: config.get('vmMAC'),
@@ -102,5 +104,5 @@ k3sVM.run('install-argocd-and-configure-service', {
     `
 });
 
-export const backupsIPv4 = k3sVM.ipv4;
-export const backupsFQDN = k3sVM.fqdn;
+export const emailIPv4 = k3sVM.ipv4;
+export const emailFQDN = k3sVM.fqdn;

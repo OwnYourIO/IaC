@@ -92,6 +92,7 @@ export abstract class VirtualMachine extends ComponentResource {
     vmConnection: Connection;
     initConnection: Connection;
     waitForPingCount: number;
+    waitForStopCount: number;
 
     abstract get providerConnection(): Connection;
 
@@ -166,6 +167,7 @@ export abstract class VirtualMachine extends ComponentResource {
 
         this.initConnection = this.vmConnection;
         this.waitForPingCount = 0;
+        this.waitForStopCount = 0;
 
         this.commandsDependsOn = opts?.dependsOn ?? [];
 
@@ -215,6 +217,7 @@ export abstract class VirtualMachine extends ComponentResource {
         create: Output<string>,
         waitForReboot?: boolean,
         waitForStart?: boolean,
+        waitForStop?: boolean,
         doNotDependOn?: boolean,
         delete?: Output<string>,
         environment?: Input<{
@@ -245,7 +248,7 @@ export abstract class VirtualMachine extends ComponentResource {
         }
 
         if (args.waitForReboot) {
-            this.waitForPing({ parent: cmd, name: `${this.fqdn}:${name}` });
+            this.waitForStop({ parent: cmd, name: `${this.fqdn}:${name}` });
             return this.commandsDependsOn.slice(-1)[0];
         }
         return cmd;
@@ -284,7 +287,6 @@ export abstract class VirtualMachine extends ComponentResource {
         this.waitForPingCount++;
         const waitForStart = new local.Command(`${this.fqdn}:waitForPing(${this.waitForPingCount})`, {
             create: interpolate`
-                sleep 10; # Make sure the VM has stopped it's network before checking if it's up.
                 # Getting the IP via dig works around issues with caching the DNS name.
                 # Perhaps I should just use ip, or failing that then DNS?
                 until ping -c 1 $(dig +short ${this.fqdn} | tail -n1); do 
@@ -298,6 +300,22 @@ export abstract class VirtualMachine extends ComponentResource {
         this.commandsDependsOn.push(waitForStart);
     }
 
+    waitForStop(args: { parent: Resource, name?: string }): void {
+        this.waitForStopCount++;
+        const waitForStop = new local.Command(`${this.fqdn}:waitForStop(${this.waitForStopCount})`, {
+            create: interpolate`
+                # Getting the IP via dig works around issues with caching the DNS name.
+                # Perhaps I should just use ip, or failing that then DNS?
+                until ! ping -c 1 $(dig +short ${this.fqdn} | tail -n1); do 
+                    sleep 3;
+                done; 
+            `
+        }, {
+            dependsOn: this.commandsDependsOn,
+            parent: args.parent ?? this.commandsDependsOn.slice(-1)[0]
+        });
+        this.commandsDependsOn.push(waitForStop);
+    }
     finalizeVM(args: VirtualMachineArgs): void {
         this.image.installQemuGuestAgent(this);
         this.image.finalize(this);

@@ -7,7 +7,7 @@ import { MicroOS, } from '../../resources/images/microos';
 
 const config = new Config();
 
-const k3sVM = VirtualMachineFactory.createVM('backups', {
+const k3sVM = VirtualMachineFactory.createVM('infra', {
     cloud: config.get('vmCloud') ?? 'proxmox',
     size: 'Medium',
     image: new MicroOS(),
@@ -102,5 +102,5 @@ k3sVM.run('install-argocd-and-configure-service', {
     `
 });
 
-export const backupsIPv4 = k3sVM.ipv4;
-export const backupsFQDN = k3sVM.fqdn;
+export const infraIPv4 = k3sVM.ipv4;
+export const infraFQDN = k3sVM.fqdn;

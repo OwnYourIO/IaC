@@ -7,18 +7,14 @@ import { MicroOS, } from '../../resources/images/microos';
 
 const config = new Config();
 
-const k3sVM = VirtualMachineFactory.createVM('backups', {
+const k3sVM = VirtualMachineFactory.createVM('grow', {
     cloud: config.get('vmCloud') ?? 'proxmox',
     size: 'Medium',
     image: new MicroOS(),
     dnsProvider: 'cloudflare',
     vLanId: config.getNumber('vmVLAN'),
     macAddress: config.get('vmMAC'),
-    //additionalSubdomains: ['build',
-    //    'artifacts', 'artifactory',
-    //    'cicd', 'drone',
-    //    'git', 'forgejo',
-    //],
+    //additionalSubdomains: [''],
 }, {
 });
 
@@ -102,5 +98,5 @@ k3sVM.run('install-argocd-and-configure-service', {
     `
 });
 
-export const backupsIPv4 = k3sVM.ipv4;
-export const backupsFQDN = k3sVM.fqdn;
+export const growIPv4 = k3sVM.ipv4;
+export const growFQDN = k3sVM.fqdn;

@@ -9,7 +9,7 @@ config:
     secure: AAABAC//o+8PdbuKxwAtNIgzT/wJaMBmvM6P8yRlAgHdfuqAXwmq/h56FVDv+YO59LQ03A==
   player:domain: spencerslab.com
   player:helmChartURL: https://ownyourio.github.io/SpencersLab/
-  player:helmServiceToDeploy: player-appset
+  player:helmServiceToDeploy: media-appset
   player:helmStage: main
   player:helmValuesURL: https://ownyourio.github.io/IaC/
   player:lets-encrypt-email: tms@spencerslab.com

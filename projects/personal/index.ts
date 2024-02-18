@@ -1,24 +1,23 @@
-import {
-    Config,
-    interpolate,
-} from "@pulumi/pulumi";
-import { VirtualMachineFactory } from '../../resources';
-import { MicroOS, } from '../../resources/images/microos';
+import { Config, interpolate, } from "@pulumi/pulumi";
+import { remote, } from "@pulumi/command";
+import { MicroOS } from '../../resources/images/microos';
+import { VirtualMachineFactory } from "../../resources";
 
 const config = new Config();
 
-const k3sVM = VirtualMachineFactory.createVM('backups', {
+const k3sVM = VirtualMachineFactory.createVM('personal', {
     cloud: config.get('vmCloud') ?? 'proxmox',
     size: 'Medium',
     image: new MicroOS(),
     dnsProvider: 'cloudflare',
     vLanId: config.getNumber('vmVLAN'),
     macAddress: config.get('vmMAC'),
-    //additionalSubdomains: ['build',
-    //    'artifacts', 'artifactory',
-    //    'cicd', 'drone',
-    //    'git', 'forgejo',
-    //],
+    childSubdomains: ['proxy'],
+    siblingSubdomains: [
+        'health',
+        'activity-monitor',
+        'health-research'
+    ],
 }, {
 });
 
@@ -102,5 +101,5 @@ k3sVM.run('install-argocd-and-configure-service', {
     `
 });
 
-export const backupsIPv4 = k3sVM.ipv4;
-export const backupsFQDN = k3sVM.fqdn;
+export const personalIPv4 = k3sVM.ipv4;
+export const personalFQDN = k3sVM.fqdn;
