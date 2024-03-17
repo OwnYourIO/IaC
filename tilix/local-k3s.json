@@ -3,145 +3,177 @@
         "child1": {
             "child1": {
                 "directory": "\/home\/spencer\/src\/OwnYour.IO\/IaC\/projects\/auth",
-                "height": 413,
+                "height": 294,
                 "profile": "2b7c4080-0ddd-46c5-8f23-563fd3ba789d",
                 "readOnly": false,
                 "synchronizedInput": false,
                 "type": "Terminal",
                 "uuid": "609a7fb4-08d3-4604-8a4b-226eedcf2409",
-                "width": 1446
+                "width": 706
             },
             "child2": {
                 "directory": "\/home\/spencer\/src\/OwnYour.IO\/IaC\/projects\/backups",
-                "height": 413,
+                "height": 294,
                 "profile": "2b7c4080-0ddd-46c5-8f23-563fd3ba789d",
                 "readOnly": false,
                 "synchronizedInput": true,
                 "type": "Terminal",
                 "uuid": "b2b0db75-7b27-4241-942f-b4f7ab13aa31",
-                "width": 1993
+                "width": 973
             },
             "orientation": 0,
             "position": 42,
-            "ratio": 0.420348837209302328,
+            "ratio": 0.420238095238095244,
             "type": "Paned"
         },
         "child2": {
             "child1": {
                 "child1": {
                     "directory": "\/home\/spencer\/src\/OwnYour.IO\/IaC\/projects\/grow",
-                    "height": 302,
+                    "height": 215,
                     "profile": "2b7c4080-0ddd-46c5-8f23-563fd3ba789d",
                     "readOnly": false,
-                    "synchronizedInput": false,
+                    "synchronizedInput": true,
                     "type": "Terminal",
                     "uuid": "f144690c-2c31-4b58-94ce-70eafc876670",
-                    "width": 1182
+                    "width": 577
                 },
                 "child2": {
                     "child1": {
                         "directory": "\/home\/spencer\/src\/OwnYour.IO\/IaC\/projects\/email",
-                        "height": 302,
+                        "height": 215,
                         "profile": "2b7c4080-0ddd-46c5-8f23-563fd3ba789d",
                         "readOnly": false,
                         "synchronizedInput": true,
                         "type": "Terminal",
                         "uuid": "d3fd2cb7-61fb-423f-aa96-054e8060b2d7",
-                        "width": 1127
+                        "width": 550
                     },
                     "child2": {
                         "directory": "\/home\/spencer\/src\/OwnYour.IO\/IaC\/projects\/cloud-proxy",
-                        "height": 302,
+                        "height": 215,
                         "profile": "2b7c4080-0ddd-46c5-8f23-563fd3ba789d",
                         "readOnly": false,
                         "synchronizedInput": true,
                         "type": "Terminal",
                         "uuid": "66cb9ad1-2b7e-4ff7-92dd-9ff5b9271872",
-                        "width": 1129
+                        "width": 551
                     },
                     "orientation": 0,
                     "position": 32,
-                    "ratio": 0.499335400974745214,
+                    "ratio": 0.499092558983666057,
                     "type": "Paned"
                 },
                 "orientation": 0,
                 "position": 34,
-                "ratio": 0.343604651162790709,
+                "ratio": 0.343452380952380953,
                 "type": "Paned"
             },
             "child2": {
                 "child1": {
                     "child1": {
                         "directory": "\/home\/spencer\/src\/OwnYour.IO\/IaC\/projects\/infra",
-                        "height": 265,
+                        "height": 189,
                         "profile": "2b7c4080-0ddd-46c5-8f23-563fd3ba789d",
                         "readOnly": false,
                         "synchronizedInput": false,
                         "type": "Terminal",
                         "uuid": "5aec7433-6234-40c7-998a-fe8baaa85774",
-                        "width": 1671
+                        "width": 572
                     },
                     "child2": {
-                        "directory": "\/home\/spencer\/src\/OwnYour.IO\/IaC\/projects\/monitoring",
-                        "height": 265,
-                        "profile": "2b7c4080-0ddd-46c5-8f23-563fd3ba789d",
-                        "readOnly": false,
-                        "synchronizedInput": false,
-                        "type": "Terminal",
-                        "uuid": "462a9a3a-6f36-4b6d-8f8c-94507687d0aa",
-                        "width": 1768
+                        "child1": {
+                            "directory": "\/home\/spencer\/src\/OwnYour.IO\/IaC\/projects\/monitoring",
+                            "height": 189,
+                            "profile": "2b7c4080-0ddd-46c5-8f23-563fd3ba789d",
+                            "readOnly": false,
+                            "synchronizedInput": false,
+                            "type": "Terminal",
+                            "uuid": "462a9a3a-6f36-4b6d-8f8c-94507687d0aa",
+                            "width": 553
+                        },
+                        "child2": {
+                            "directory": "\/home\/spencer\/src\/OwnYour.IO\/IaC\/projects\/home",
+                            "height": 189,
+                            "profile": "2b7c4080-0ddd-46c5-8f23-563fd3ba789d",
+                            "readOnly": false,
+                            "synchronizedInput": true,
+                            "type": "Terminal",
+                            "uuid": "42af0aa1-d3dc-4ab1-9d0e-98b7a4b2baf6",
+                            "width": 553
+                        },
+                        "orientation": 0,
+                        "position": 32,
+                        "ratio": 0.499548328816621479,
+                        "type": "Paned"
                     },
                     "orientation": 0,
-                    "position": 48,
-                    "ratio": 0.48575581395348838,
+                    "position": 34,
+                    "ratio": 0.340476190476190488,
                     "type": "Paned"
                 },
                 "child2": {
                     "child1": {
                         "directory": "\/home\/spencer\/src\/OwnYour.IO\/IaC\/projects\/personal",
-                        "height": 378,
+                        "height": 270,
                         "profile": "2b7c4080-0ddd-46c5-8f23-563fd3ba789d",
                         "readOnly": false,
                         "synchronizedInput": true,
                         "type": "Terminal",
                         "uuid": "285f7cc8-9648-46f0-a1ee-16d92ef3ca9e",
-                        "width": 1670
+                        "width": 572
                     },
                     "child2": {
-                        "directory": "\/home\/spencer\/src\/OwnYour.IO\/IaC\/projects\/player",
-                        "height": 378,
-                        "profile": "2b7c4080-0ddd-46c5-8f23-563fd3ba789d",
-                        "readOnly": false,
-                        "synchronizedInput": false,
-                        "type": "Terminal",
-                        "uuid": "1403960f-1d22-47dd-b0d3-f06c761f6b1e",
-                        "width": 1769
+                        "child1": {
+                            "directory": "\/home\/spencer\/src\/OwnYour.IO\/IaC\/projects\/player",
+                            "height": 270,
+                            "profile": "2b7c4080-0ddd-46c5-8f23-563fd3ba789d",
+                            "readOnly": false,
+                            "synchronizedInput": false,
+                            "type": "Terminal",
+                            "uuid": "1403960f-1d22-47dd-b0d3-f06c761f6b1e",
+                            "width": 553
+                        },
+                        "child2": {
+                            "directory": "\/home\/spencer\/src\/OwnYour.IO\/IaC\/projects\/media",
+                            "height": 270,
+                            "profile": "2b7c4080-0ddd-46c5-8f23-563fd3ba789d",
+                            "readOnly": false,
+                            "synchronizedInput": true,
+                            "type": "Terminal",
+                            "uuid": "1d1f7809-1be8-4d74-be85-0b1a858a5d79",
+                            "width": 553
+                        },
+                        "orientation": 0,
+                        "position": 32,
+                        "ratio": 0.499548328816621479,
+                        "type": "Paned"
                     },
                     "orientation": 0,
-                    "position": 48,
-                    "ratio": 0.485465116279069742,
+                    "position": 34,
+                    "ratio": 0.340476190476190488,
                     "type": "Paned"
                 },
                 "orientation": 1,
                 "position": 19,
-                "ratio": 0.411490683229813692,
+                "ratio": 0.410869565217391319,
                 "type": "Paned"
             },
             "orientation": 1,
             "position": 22,
-            "ratio": 0.318901795142555455,
+            "ratio": 0.318047337278106523,
             "type": "Paned"
         },
         "orientation": 1,
         "position": 30,
-        "ratio": 0.303453343130051456,
+        "ratio": 0.302780638516992773,
         "type": "Paned"
     },
-    "height": 1361,
+    "height": 971,
     "name": "${title}",
     "synchronizedInput": true,
     "type": "Session",
     "uuid": "fe14d132-12f8-465f-8256-3ef48c873a74",
     "version": "1.0",
-    "width": 3440
+    "width": 1680
 }

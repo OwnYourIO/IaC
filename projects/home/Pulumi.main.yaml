@@ -1,16 +1,22 @@
 config:
-  Home:bitwarden-cli-secret:
-    secure: AAABAC04gxQJWlnQCiQ3Ct2hVTqI0o8gsSP70RI7wFuhkgJGFPd6sqLBusF2EcT2k0l83ckzRFko/oS0CPbBVuVWxTISXRLceMMtMrRRX3z2shDi+q72m+ffI11YPWrT1X8WbRcuP+BVLtKRh/n//EDhJfLjPfikeMq84n/0E82yzo7ZULK9s0Kkun2tnWxNcRbDHHudbmKbVhQOFj5uWKAcCphRhafG2fZTqy2pljqVo778rq7ETMwofdBa5br71GvB8LWwS+GDS+VjQNYhPZWeeCnFb0Bhb6r10pW/OCP/wgxEk2wa5qlI9x+yCYT+lnCl2Tedqgu9TCfDPu5Xlew6R6QlE2xp9N6xv5mPyOEJWSMXDIOHEZvZVSibu66YlxhSV4A/J4JB8bTaJhvBSezyA4HQPx6UJTSrZoqUMvZVcG+KYgULJGU3JlLjklpHlWu42vtxxTeqpTa1btMK8MOlHXZRSLjxenzXxboWtVTTk9v1qJHValuZfET07lP7WY8r7w==
-  Home:cloudflare-zoneId-spencerslab.com: d1e88bbc577f77595127d4954d9a98b8
-  Home:default-admin-password:
-    secure: AAABAH0rVLZIf/J6uPaX85aO26Yvgrh+V3sSR0lm8e5oOdDVYhGKXFk=
-  Home:default-admin-user: admin
-  Home:domain: spencerslab.com
-  Home:lets-encrypt-email: tms@spencerslab.com
-  Home:proxmox_ve_endpoint: https://pve-main.spencerslab.com:8006
-  Home:proxmox_ve_password:
-    secure: AAABAA1Cx9v7fQjPedPmR6lBrWiybrbvZuHXVkztYFwkIQQyuE6YlTs=
-  Home:proxmox_ve_username: root@pam
   cloudflare:apiToken:
-    secure: AAABAGH+V4kId0VFmXrhLbmgmqozqysUJXugEGxp+l75N/FGiAQxml+gINnArZc/ZEIcb2/XtsT5X6vOQObQglUho3Hj5mMJ
-  proxmox-templates:default-admin-user: spencer
+    secure: AAABAIu2n1LvtxLp2WgKW5VUgoUH0EpwWHPwwaoR53+4HqL6xoatwafdzBavgFhU3X/7S86twfMDkVbK1g4biX9TBxSel7Uu
+  home:additionalSubDomains: '[]'
+  home:bitwarden-cli-secret:
+    secure: AAABAKmANV6LEUVk+tHAJBOL01XmF0v8aqD4yxK2HyDE9/bzKiP4WTcxEb5fHp8sZelZB2UfkG8yxU0n8yrzMOASzQG/r9VITeBgaDX5p2XCpmEUeD/cechqb1ucY/7ctRQ64+105Z9lRBKYJRkNdiKyfYbQHa9imZuhnZFRVYxeJb7UasI8zQ8NIje7TWDb2vP3tRR2gsuv7RXAFUyQ1yEgDsX7s6HzykfjLUSusbWiegraWk4nJuJ1dG/WL4vNV1iHMGIPryqPTnPqgbgzFOg3rNBa+IOeHjEp4ngMgtevZyOFYqEwYF4J2ldXnRaPm1U+D370eC/TJSRfnCerte4paxfXOwoHg6dW3OW28z1iGL778hcVZ9gpT/38cwBBSiurrClbcoQlcvo/1eSoHS0aoN8NrgBpLZP887acahAQqh0ka1BM6IxRU/yok+4CXnDRRBPvlw5+kmgf3jfB2z7ZyESvYnAn7CpY2zRpc5Wba0dnsRhOAgB9X9735wbefUn1Ww==
+  home:cloudflare-zoneId-spencerslab.com: d1e88bbc577f77595127d4954d9a98b8
+  home:default-admin-password:
+    secure: AAABAB4FasRk2u9Nhq5rk7EEH2XvQwOa+UEYuusNUzVIPyMO7mqvSyKoYRXevcFwVOzsOw==
+  home:domain: spencerslab.com
+  home:helmChartRepo: https://ownyourio.github.io/SpencersLab/
+  home:helmServiceToDeploy: home-appset
+  home:helmStage: prod
+  home:helmValuesRepo: https://ownyourio.github.io/IaC/
+  home:lets-encrypt-email: tms@spencerslab.com
+  home:proxmox_ve_endpoint: https://pve-main.spencerslab.com:8006
+  home:proxmox_ve_password:
+    secure: AAABABH1Yb5kdUVKEhuoSIOU/CV8icvnC+gAw6oKsjaVdWl/jsgI1e8=
+  home:proxmox_ve_username: root@pam
+  home:vmMAC: "D6:8A:F6:C9:4E:A3"
+  home:vmProvider: proxmox
+  home:vmVLAN: "3"

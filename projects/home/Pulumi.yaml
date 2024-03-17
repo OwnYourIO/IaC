@@ -1,5 +1,5 @@
-name: Home
-description: Set up a TechnoCore server running Home Assistant
+name: home
+description: Set up a k3s server running Home Assistant
 runtime:
   name: nodejs
   options:
