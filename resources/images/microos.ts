@@ -1,5 +1,5 @@
 import { remote, local, types } from "@pulumi/command";
-import { interpolate } from "@pulumi/pulumi";
+import { Config, interpolate } from "@pulumi/pulumi";
 import { BaseVMImage } from './';
 import { VirtualMachine } from "../providers";
 
@@ -78,6 +78,47 @@ export class MicroOS extends BaseVMImage {
 
         return vm.commandsDependsOn;
     }
+
+    k3s(): void {
+        if (this.vm === undefined) {
+            throw new Error('vm is undefined');
+        }
+        this.vm.run('install-k3s', {
+            waitForReboot: true,
+            create: interpolate`
+            ${this.vm.sudo} bash -c "
+                curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC='server --cluster-init --write-kubeconfig-mode=600' sh -
+                echo 'export KUBECONFIG=/etc/rancher/k3s/k3s.yaml' >> /root/.bashrc
+                reboot&
+            "
+            exit
+        `
+        });
+        // This has to be done separate because of transactions
+        this.vm.run('install-k9s-and-helm', {
+            waitForReboot: true,
+            create: interpolate`
+                # policycoreutils-python-utils is to support: 
+                # semanage port -a -p tcp -t ssh_port_t 8096
+                echo 'export KUBECONFIG=~/.kube/config' >>~/.bashrc
+                THE_USER=$USER
+                THE_USER_HOME=$HOME
+                ${this.vm.sudo} bash -c "
+                    ${this.vm.install} helm policycoreutils-python-utils k9s git
+
+                    # Configure k3s access for admin user.
+                    mkdir -p $THE_USER_HOME/.kube/
+                    cp /etc/rancher/k3s/k3s.yaml $THE_USER_HOME/.kube/config
+                    chown -R $THE_USER $THE_USER_HOME/.kube/
+                    chmod 600 $THE_USER_HOME/.kube/config
+
+                    reboot&
+                "
+                exit
+            `
+        });
+    };
+
 }
 
 export class MicroOSDesktop extends MicroOS {

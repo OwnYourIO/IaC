@@ -119,6 +119,12 @@ export abstract class VirtualMachine extends ComponentResource {
         return this.image.install;
     }
 
+    // Setup is for generically getting the install/configure code based on the image.
+    get setup(): BaseVMImage {
+        this.image.vm = this;
+        return this.image
+    }
+
     abstract createVM(): void;
 
     constructor(
